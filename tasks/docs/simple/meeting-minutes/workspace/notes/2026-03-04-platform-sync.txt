@@ -1,0 +1,73 @@
+Platform Sync -- Wed 4 March 2026, 10:00-11:05, Room Kestrel
+Scribe: pri
+
+Present: pri, dm, hs, ln, tk, ay
+Regrets: rj (on leave), mo (customer onsite)
+
+Agenda
+  1. Postgres 16 upgrade
+  2. Canary deploy rollout
+  3. Redis eviction incident follow-up
+  4. Q2 headcount
+
+--- 1. Postgres 16 upgrade ---
+
+dm walked through the staging soak: eleven days on the new cluster, no
+regressions in the nightly query suite, p99 on the checkout path down from
+84 ms to 61 ms. hs asked about the logical replication slot lag that bit us
+in the 15.4 upgrade; dm confirmed the slot monitor now alerts at 200 MB
+instead of 2 GB, which would have caught it.
+
+ay pushed for a date. The 12 March release window is already a low-traffic
+Thursday and marketing has nothing scheduled.
+
+DECISION: ship the Postgres 16 upgrade to production in the 12 March
+release window; dm owns the runbook.
+ACTION: dm to publish the upgrade runbook, due Mon 9 Mar.
+ACTION: hs to schedule the read-replica cutover rehearsal, due Wed 11 Mar.
+QUESTION: do we need a separate rollback window for the analytics replica?
+Left open -- dm to bring the restore timings next week.
+
+--- 2. Canary deploy rollout ---
+
+ln reported that six of the nine payments services now deploy through the
+canary pipeline. The three holdouts are ledger-writer, fx-quote and the old
+settlement batch job. ln's view: ledger-writer and fx-quote are a week of
+work each, the batch job is a rewrite.
+
+ay wanted a deadline rather than a plan. tk noted that the incident review
+board has been asking for exactly this since January.
+
+DECISION: canary deploys become mandatory for all services in the payments
+group starting 1 April; hs owns the policy text.
+ACTION: ln to add canary gates to the payments CI templates, due Fri 13 Mar.
+QUESTION: who pages when a canary stalls at 5 percent? Unresolved -- the
+current runbook says "the deploying team" and nobody believes it.
+
+--- 3. Redis eviction incident follow-up ---
+
+tk read out the timeline from the 27 February session-loss incident: the
+session cluster hit its 8 GB maxmemory ceiling at 14:12, allkeys-lru began
+evicting, and roughly 40 000 users were signed out over eleven minutes.
+Headroom at the time of the incident was under 4 percent.
+
+pri asked whether more memory just delays the same failure. tk agreed it
+does, but the growth curve gives us two quarters.
+
+DECISION: raise the Redis maxmemory ceiling from 8 GB to 12 GB on the
+session cluster; tk owns the change.
+ACTION: tk to file the capacity change request, due Thu 5 Mar.
+QUESTION: should session data move off Redis entirely in H2? Parked for
+the architecture review.
+
+--- 4. Q2 headcount ---
+
+ay reported that the budget envelope for Q2 came back smaller than the
+draft plan assumed. Of the two open SRE requisitions, one is already in
+final-round interviews and one has not been posted.
+
+DECISION: defer the second SRE requisition to Q3; ay owns the update to
+the plan.
+ACTION: ay to update the hiring plan document, due Tue 17 Mar.
+
+Meeting closed 11:05. Next sync 11 March, same room.

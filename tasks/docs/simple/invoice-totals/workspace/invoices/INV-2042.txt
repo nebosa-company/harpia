@@ -1,0 +1,15 @@
+INVOICE INV-2042
+Client: Halden Marine
+Issued: 2026-01-21
+Terms: net 14
+Currency: EUR
+
+Line items
+  qty   unit      description
+  6     220.00    Sensor calibration, per unit
+  25    64.00     Field technician hours
+
+Discount: 0%
+Tax: 25%
+
+Remit to Kestrel Consulting BV. Questions to billing@kestrel.example.

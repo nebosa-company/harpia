@@ -1,0 +1,16 @@
+INVOICE INV-2041
+Client: Northwind Analytics
+Issued: 2026-01-14
+Terms: net 30
+Currency: EUR
+
+Line items
+  qty   unit      description
+  12    145.00    Discovery workshop, per day
+  3     980.00    Integration engineering, per week
+  40    85.50     Support hours, out of contract
+
+Discount: 5%
+Tax: 21%
+
+Remit to Kestrel Consulting BV. Questions to billing@kestrel.example.

@@ -1,0 +1,15 @@
+# Terms the glossary must cover, one per line.
+# Lines starting with # are comments.
+
+canary deploy
+error budget
+blast radius
+dark launch
+golden signal
+incident commander
+maxmemory
+on-call rota
+replication slot
+runbook
+shadow traffic
+subject access request

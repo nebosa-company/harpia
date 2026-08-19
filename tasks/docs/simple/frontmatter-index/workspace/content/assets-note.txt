@@ -1,0 +1,2 @@
+Diagrams for the handbook live in the design drive, not in this folder.
+Only markdown pages belong here.

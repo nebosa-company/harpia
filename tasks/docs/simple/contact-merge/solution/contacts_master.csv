@@ -1,0 +1,11 @@
+email,full_name,company,phone,sources
+ada.lovelace@northwind.example,Ada Lovelace,Northwind Analytics,+44 20 7946 0102,crm;events
+b.kaur@haldenmarine.example,Baljit Kaur,Halden Marine,+47 51 22 90 30,crm;newsletter
+c.moreau@castellane.example,Camille Moreau,Castellane Foods,+33 1 70 18 22 09,crm;events
+d.ericsson@ptarmiganrail.example,Dag Ericsson,Ptarmigan Rail,+46 8 555 12 34,crm
+e.nakamura@northwind.example,Emi Nakamura,Northwind Analytics,+81 3 5555 0110,crm;newsletter
+f.okonkwo@sable.example,Femi Okonkwo,Sable Logistics,+234 1 271 0044,events;newsletter
+g.halvorsen@ptarmiganrail.example,Greta Halvorsen,Ptarmigan Rail,+47 22 44 11 90,events
+h.silva@castellane.example,Helena Silva,Castellane Foods,+351 21 999 8877,events
+i.brandt@sable.example,Ingo Brandt,Sable Logistics,,newsletter
+j.almeida@castellane.example,Joana Almeida,Castellane Foods,+351 21 444 2211,newsletter

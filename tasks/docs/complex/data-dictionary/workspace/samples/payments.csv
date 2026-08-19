@@ -1,0 +1,4 @@
+id,invoice_id,received_on,amount_cents,method,reference
+77201,55012,2026-02-27,353592,transfer,
+77202,55011,2026-03-02,500000,card,ch_8f21ac
+77203,55011,2026-03-09,431095,direct_debit,dd_20260309_11

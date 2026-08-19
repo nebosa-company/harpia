@@ -1,0 +1,79 @@
+[
+  {
+    "account_id": "ACC-1001",
+    "contact_name": "Ada Lovelace",
+    "company": "Northwind Analytics",
+    "address_line": "14 Bellevue Road",
+    "city": "Bristol",
+    "postcode": "BS8 2QT",
+    "plan": "Scale",
+    "renewal_date": "2026-04-14",
+    "seats": 24,
+    "unit_price": 145.00,
+    "account_manager": "Camille Moreau"
+  },
+  {
+    "account_id": "ACC-1002",
+    "contact_name": "Baljit Kaur",
+    "company": "Halden Marine",
+    "address_line": "3 Havnegata",
+    "city": "Bergen",
+    "postcode": "5003",
+    "plan": "Standard",
+    "renewal_date": "2026-05-02",
+    "seats": 8,
+    "unit_price": 92.50,
+    "account_manager": "Dag Ericsson"
+  },
+  {
+    "account_id": "ACC-1003",
+    "contact_name": "Femi Okonkwo",
+    "company": "Sable Logistics",
+    "address_line": "12 Marina Crescent",
+    "city": "Lagos",
+    "postcode": "101241",
+    "plan": "Enterprise",
+    "renewal_date": "2026-06-01",
+    "seats": 120,
+    "unit_price": 118.75,
+    "account_manager": "Camille Moreau"
+  },
+  {
+    "account_id": "ACC-1004",
+    "contact_name": "Greta Halvorsen",
+    "company": "Ptarmigan Rail",
+    "address_line": "44 Jernbanetorget",
+    "city": "Oslo",
+    "postcode": "",
+    "plan": "Scale",
+    "renewal_date": "2026-04-30",
+    "seats": 40,
+    "unit_price": 145.00,
+    "account_manager": "Dag Ericsson"
+  },
+  {
+    "account_id": "ACC-1005",
+    "contact_name": "Helena Silva",
+    "company": "Castellane Foods",
+    "address_line": "8 Rua do Alecrim",
+    "city": "Lisbon",
+    "postcode": "1200-014",
+    "plan": "Scale",
+    "renewal_date": "2026-03-09",
+    "seats": 15,
+    "unit_price": 145.00,
+    "account_manager": "Dag Ericsson"
+  },
+  {
+    "account_id": "ACC-1006",
+    "contact_name": "Ingo Brandt",
+    "company": "Sable Logistics",
+    "address_line": "12 Marina Crescent",
+    "city": "Lagos",
+    "postcode": "101241",
+    "plan": "Standard",
+    "renewal_date": "2026-07-20",
+    "seats": 6,
+    "unit_price": null
+  }
+]

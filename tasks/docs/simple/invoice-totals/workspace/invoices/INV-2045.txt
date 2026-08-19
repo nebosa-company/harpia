@@ -1,0 +1,19 @@
+INVOICE INV-2045
+Client: Ptarmigan Rail
+Issued: 2026-03-05
+Terms: net 45
+Currency: EUR
+
+Line items
+  qty   unit      description
+  240   12.25     Timetable record conversion, each
+  5     96.00     Schema review session
+  2     1875.00   Signalling data audit, per corridor
+  1     900.00    Standby retainer, February (void)
+  7     44.00     Ad-hoc query support hours
+
+Discount: 0%
+Tax: 25%
+
+The February retainer was already invoiced on INV-2039 and is voided here
+to avoid a double charge.

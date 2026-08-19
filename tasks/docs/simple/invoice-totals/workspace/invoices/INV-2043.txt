@@ -1,0 +1,18 @@
+INVOICE INV-2043
+Client: Castellane Foods
+Issued: 2026-02-02
+Terms: net 30
+Currency: EUR
+
+Line items
+  qty   unit      description
+  18    37.50     Recipe data cleanup, per SKU
+  9     150.00    Supplier interview, each
+  2     500.00    Onsite audit, day rate (void)
+  4     312.25    Compliance report, per region
+
+Discount: 10%
+Tax: 20%
+
+The onsite audit was cancelled by the client on 28 January and is not
+billed. Remit to Kestrel Consulting BV.

@@ -1,0 +1,25 @@
+# Exported with: git log --oneline --date=short, newest commit first.
+# A RELEASE line marks where a tag sits in the history.
+
+7c1e0a4 2026-03-11 fix(search): stop dropping the last page of results
+2ab9d10 2026-03-09 feat(api): add cursor pagination to /v1/orders
+5e40c73 2026-03-04 docs(api): document the cursor parameter
+b18f2e6 2026-03-02 chore(deps): bump the internal http client
+RELEASE v1.4.0 2026-02-20
+f30c9b1 2026-02-19 chore(release): v1.4.0
+88a2d4e 2026-02-18 feat(billing)!: drop the legacy invoice endpoint
+c07e5aa 2026-02-16 feat(billing): add proration to subscription upgrades
+41d8b39 2026-02-12 fix(auth): refresh tokens no longer expire early
+9be1f75 2026-02-10 refactor(billing): split the invoice builder
+0c4a6d2 2026-02-05 fix: correct the currency rounding on receipts
+RELEASE v1.3.0 2026-01-16
+e5b70c8 2026-01-15 chore(release): v1.3.0
+1f9d23a 2026-01-14 feat(search): faceted filters on the catalogue
+7ab0e41 2026-01-12 fix(search): escape user input in the query builder
+33c9f60 2026-01-08 perf(catalogue): cache the facet counts
+d92be07 2026-01-06 test(search): cover the escaping path
+RELEASE v1.2.0 2025-12-05
+a4f81cc 2025-12-04 chore(release): v1.2.0
+6d02b9e 2025-12-03 feat(orders)!: order ids become opaque strings
+b7c3a15 2025-12-01 fix(orders): stop double-charging on retried webhooks
+20e9df4 2025-11-28 docs: add the webhook retry guide

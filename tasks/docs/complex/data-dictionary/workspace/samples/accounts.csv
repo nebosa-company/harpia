@@ -1,0 +1,4 @@
+id,name,country_code,plan,seats,legacy_ref,created_at
+1001,Northwind Analytics Ltd,GB,scale,24,,2024-03-11T09:14:02Z
+1002,Halden Marine AS,NO,standard,8,HM-4471,2024-07-02T11:40:55Z
+1003,Castellane Foods SA,FR,enterprise,120,,2025-01-19T08:02:17Z

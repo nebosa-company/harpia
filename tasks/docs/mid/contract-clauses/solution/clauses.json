@@ -1,0 +1,197 @@
+{
+  "title": "Master Services Agreement",
+  "sections": [
+    {
+      "number": "1",
+      "title": "Definitions and interpretation",
+      "clauses": [
+        {
+          "id": "1.1",
+          "text": "In this Agreement: \"Affiliate\" means any entity that controls, is controlled by, or is under common control with a party; \"Confidential Information\" means any information disclosed by one party to the other that is marked as confidential or that a reasonable recipient would understand to be confidential; \"Order Form\" means a document signed by both parties that identifies the services to be provided and the fees payable for them; \"Services\" means the services identified in an Order Form.",
+          "defined_terms": [
+            "Affiliate",
+            "Confidential Information",
+            "Order Form",
+            "Services"
+          ],
+          "cross_references": []
+        },
+        {
+          "id": "1.2",
+          "text": "A reference to a Clause is a reference to a clause of this Agreement. Headings are for convenience only and do not affect interpretation. Words in the singular include the plural and the other way round.",
+          "defined_terms": [],
+          "cross_references": []
+        }
+      ]
+    },
+    {
+      "number": "2",
+      "title": "Provision of the Services",
+      "clauses": [
+        {
+          "id": "2.1",
+          "text": "The Supplier shall provide the Services with reasonable skill and care and in accordance with the Order Form.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "2.2",
+          "text": "The Supplier may subcontract any part of the Services to an Affiliate or to a third party, and remains responsible for the acts and omissions of any subcontractor as if they were its own.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "2.3",
+          "text": "The Supplier may change the way the Services are delivered provided the change does not materially reduce their functionality. A change that does materially reduce functionality is a material breach for the purposes of Clause 8.2.",
+          "defined_terms": [],
+          "cross_references": [
+            "8.2"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "3",
+      "title": "Customer obligations",
+      "clauses": [
+        {
+          "id": "3.1",
+          "text": "The Customer shall provide the Supplier with the access, information and personnel that the Supplier reasonably requires in order to provide the Services.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "3.2",
+          "text": "Where the Supplier is delayed by the Customer's failure to meet Clause 3.1, any date agreed in the Order Form is extended by the length of the delay and the Supplier may charge for time lost at the rates in the Order Form.",
+          "defined_terms": [],
+          "cross_references": [
+            "3.1"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "4",
+      "title": "Fees and payment",
+      "clauses": [
+        {
+          "id": "4.1",
+          "text": "The Customer shall pay the fees set out in the Order Form. Fees are exclusive of value added tax, which is charged in addition at the prevailing rate.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "4.2",
+          "text": "Invoices are payable within 30 days of the date of issue. The Supplier may charge interest on any amount not paid by its due date at four per cent above the base rate, accruing daily.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "4.3",
+          "text": "The Supplier may increase the fees once in any twelve month period by giving the Customer at least 60 days written notice. If the increase exceeds five per cent the Customer may terminate under Clause 8.1 without further liability.",
+          "defined_terms": [],
+          "cross_references": [
+            "8.1"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "5",
+      "title": "Confidentiality",
+      "clauses": [
+        {
+          "id": "5.1",
+          "text": "Each party shall keep the other party's Confidential Information confidential, shall use it only for the purpose of this Agreement, and shall not disclose it to any person other than an employee, Affiliate or subcontractor who needs it for that purpose and is bound by obligations no less protective than these.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "5.2",
+          "text": "Clause 5.1 does not apply to information that is or becomes public through no fault of the receiving party, was already lawfully held by the receiving party without an obligation of confidence, or is required to be disclosed by law or by a competent authority.",
+          "defined_terms": [],
+          "cross_references": [
+            "5.1"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "6",
+      "title": "Data protection",
+      "clauses": [
+        {
+          "id": "6.1",
+          "text": "\"Personal Data\" means personal data as defined in applicable data protection law that the Supplier processes on the Customer's behalf in providing the Services. The Customer is the controller of the Personal Data and the Supplier is its processor.",
+          "defined_terms": [
+            "Personal Data"
+          ],
+          "cross_references": []
+        },
+        {
+          "id": "6.2",
+          "text": "The Supplier shall process Personal Data only on the Customer's documented instructions, shall keep it secure using appropriate technical and organisational measures, and shall not engage a sub-processor except in accordance with Clause 2.2.",
+          "defined_terms": [],
+          "cross_references": [
+            "2.2"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "7",
+      "title": "Liability",
+      "clauses": [
+        {
+          "id": "7.1",
+          "text": "Nothing in this Agreement limits either party's liability for death or personal injury caused by negligence, for fraud, or for any other liability that cannot lawfully be limited.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "7.2",
+          "text": "Subject to Clause 7.1, neither party is liable for loss of profit, loss of revenue, loss of anticipated savings, or any indirect or consequential loss, however arising.",
+          "defined_terms": [],
+          "cross_references": [
+            "7.1"
+          ]
+        },
+        {
+          "id": "7.3",
+          "text": "Subject to Clause 7.1 and Clause 7.2, each party's total liability under this Agreement is limited to the fees paid or payable under the Order Form in the twelve months before the claim arose.",
+          "defined_terms": [],
+          "cross_references": [
+            "7.1",
+            "7.2"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "8",
+      "title": "Term and termination",
+      "clauses": [
+        {
+          "id": "8.1",
+          "text": "This Agreement begins on the date of the first Order Form and continues until every Order Form has expired or been terminated.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "8.2",
+          "text": "Either party may terminate this Agreement immediately by written notice if the other party commits a material breach that is not remedied within 30 days of a written request to remedy it.",
+          "defined_terms": [],
+          "cross_references": []
+        },
+        {
+          "id": "8.3",
+          "text": "On termination the Customer shall pay for Services provided up to the date of termination, and each party shall return or destroy the other party's Confidential Information in accordance with Clause 5.1.",
+          "defined_terms": [],
+          "cross_references": [
+            "5.1"
+          ]
+        }
+      ]
+    }
+  ]
+}

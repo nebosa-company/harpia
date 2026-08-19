@@ -1,0 +1,5 @@
+id,invoice_id,description,quantity,unit_price_cents,line_kind
+900141,55011,Discovery workshop per day,12,14500,subscription
+900142,55011,Integration engineering per week,3,98000,subscription
+900143,55012,Seat adjustment 18-31 March,6,4830,proration
+900144,55012,Goodwill credit agreed 2026-02-20,1,-12000,credit

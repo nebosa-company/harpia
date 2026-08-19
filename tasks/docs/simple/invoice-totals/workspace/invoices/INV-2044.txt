@@ -1,0 +1,16 @@
+INVOICE INV-2044
+Client: Northwind Analytics
+Issued: 2026-02-17
+Terms: net 30
+Currency: EUR
+
+Line items
+  qty   unit      description
+  1     4500.00   Platform migration, fixed fee
+  16    118.75    Post-migration support hours
+
+Discount: 12.5%
+Tax: 21%
+
+Second engagement of the year; the fixed fee is the amount agreed in the
+statement of work dated 2026-01-30.

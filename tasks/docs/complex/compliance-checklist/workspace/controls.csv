@@ -1,0 +1,17 @@
+control_id,control_name
+C-01,Role-based access provisioning
+C-02,Privileged access review
+C-03,Multi-factor authentication
+C-04,Joiner mover leaver process
+C-05,Secret and key storage
+C-06,Encryption in transit
+C-07,Encryption at rest
+C-08,Backup restoration testing
+C-09,Data retention enforcement
+C-10,Data subject request handling
+C-11,Vendor risk assessment
+C-12,Change management
+C-13,Incident response exercise
+C-14,Logging and monitoring
+C-15,Business continuity plan
+C-16,Security awareness training
