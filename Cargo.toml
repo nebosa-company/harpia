@@ -14,6 +14,8 @@ members = [
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.85"
+# Code is MPL-2.0; the task corpus under tasks/ is CC-BY-4.0 (tasks/LICENSE).
+license = "MPL-2.0"
 
 [workspace.dependencies]
 harpia-core = { path = "crates/harpia-core" }

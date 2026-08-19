@@ -105,3 +105,14 @@ hand-built cases: a benchmark's numbers must not move because a crate did.
 ```bash
 cargo test --workspace
 ```
+
+## License
+
+The code is [MPL-2.0](LICENSE). Clone it, change it, ship it — including inside
+a closed product — but changes to Harpia's own files stay open, and the
+copyright stays where it is. A fork is welcome; a fork passed off as its own
+work is not.
+
+The task corpus under [`tasks/`](tasks/LICENSE) is **CC-BY-4.0** instead,
+because 260 tasks are content rather than code. Reuse them anywhere, in a paper
+or another benchmark, with credit to Harpia.
