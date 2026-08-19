@@ -1,0 +1,11 @@
+[package]
+name = "harpia-runner"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+harpia-core.workspace = true
+harpia-store.workspace = true
+harpia-harness.workspace = true
+harpia-oracle.workspace = true
+anyhow.workspace = true

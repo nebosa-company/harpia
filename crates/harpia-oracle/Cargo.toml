@@ -1,0 +1,8 @@
+[package]
+name = "harpia-oracle"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+harpia-core.workspace = true
+anyhow.workspace = true

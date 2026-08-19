@@ -1,0 +1,37 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/harpia-core",
+    "crates/harpia-store",
+    "crates/harpia-harness",
+    "crates/harpia-oracle",
+    "crates/harpia-runner",
+    "crates/harpia-report",
+    "crates/harpia-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+
+[workspace.dependencies]
+harpia-core = { path = "crates/harpia-core" }
+harpia-store = { path = "crates/harpia-store" }
+harpia-harness = { path = "crates/harpia-harness" }
+harpia-oracle = { path = "crates/harpia-oracle" }
+harpia-runner = { path = "crates/harpia-runner" }
+harpia-report = { path = "crates/harpia-report" }
+
+anyhow = "1"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+clap = { version = "4", features = ["derive"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

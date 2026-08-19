@@ -1,0 +1,18 @@
+[package]
+name = "harpia-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "harpia"
+path = "src/main.rs"
+
+[dependencies]
+harpia-core.workspace = true
+harpia-store.workspace = true
+harpia-harness.workspace = true
+harpia-oracle.workspace = true
+harpia-runner.workspace = true
+harpia-report.workspace = true
+anyhow.workspace = true
+clap.workspace = true
