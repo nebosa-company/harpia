@@ -35,3 +35,26 @@ pub enum Outcome {
     Crashed,
     Malformed,
 }
+
+impl Outcome {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Outcome::Finished => "finished",
+            Outcome::Timeout => "timeout",
+            Outcome::CostCeiling => "cost-ceiling",
+            Outcome::Crashed => "crashed",
+            Outcome::Malformed => "malformed",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        Some(match s {
+            "finished" => Outcome::Finished,
+            "timeout" => Outcome::Timeout,
+            "cost-ceiling" => Outcome::CostCeiling,
+            "crashed" => Outcome::Crashed,
+            "malformed" => Outcome::Malformed,
+            _ => return None,
+        })
+    }
+}
