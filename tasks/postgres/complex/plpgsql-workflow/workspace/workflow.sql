@@ -1,0 +1,3 @@
+-- The reservation workflow. Write the functions and whatever the database
+-- needs to keep them honest here.
+-- This file is applied immediately after schema.sql.

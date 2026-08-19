@@ -1,0 +1,2 @@
+-- Queue indexes. Create them here.
+-- This file is applied immediately after schema.sql.

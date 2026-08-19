@@ -1,0 +1,2 @@
+-- Shipment loader. Define apply_shipment_line here.
+-- This file is applied immediately after schema.sql.

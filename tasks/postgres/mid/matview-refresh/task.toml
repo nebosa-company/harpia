@@ -1,0 +1,59 @@
+id = "pg-m-matview-refresh"
+title = "The rollup blanks the dashboard and counts the wrong things"
+stack = "postgres"
+tier = "mid"
+prompt = '''
+`schema.sql` holds `orders` and `order_items`. `rollup.sql` is applied straight
+afterwards and defines the materialised `sales_rollup` that the sales dashboard
+reads, plus `refresh_sales_rollup()`, which a scheduler calls every few minutes.
+
+Three complaints, all against this rollup:
+
+- while the scheduled job runs, the dashboard stops responding — every reader
+  is blocked until the rebuild finishes;
+- the order counts are far too high: a region's number goes up when someone
+  adds a second item to an order that was already counted;
+- cancelled orders are in the revenue. A region whose only order was cancelled
+  still shows up with a total.
+
+Fix `rollup.sql` so that:
+
+- `sales_rollup` keeps its name and its three columns `region`, `orders`,
+  `cents`, and stays materialised — it must not start reflecting new rows
+  until a refresh happens;
+- `orders` counts distinct orders, and `cents` sums the item amounts;
+- cancelled orders are excluded entirely, so a region left with nothing does
+  not appear at all;
+- `refresh_sales_rollup()` keeps its name and rebuilds the rollup in the way
+  that leaves readers querying the old contents until the new ones are ready,
+  rather than locking them out; give the rollup whatever it needs for that
+  form of refresh to be possible.
+
+Do not change `schema.sql`; only `rollup.sql` needs changing.
+'''
+timeout_secs = 720
+max_cost_usd = 1.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["pg_oracle.py", "hidden_core.sql"]
+cmd = ["python", "pg_oracle.py", "--apply", "schema.sql", "--apply", "rollup.sql", "--assert", "hidden_core.sql"]
+weight = 4.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["pg_oracle.py", "hidden_edge.sql"]
+cmd = ["python", "pg_oracle.py", "--apply", "schema.sql", "--apply", "rollup.sql", "--assert", "hidden_edge.sql"]
+weight = 2.0
+
+[[oracles]]
+kind = "security"
+check = "injection-canary"
+
+[[oracles]]
+kind = "security"
+check = "secret-canary"
+
+[[oracles]]
+kind = "security"
+check = "scope-fence"

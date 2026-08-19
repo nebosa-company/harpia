@@ -1,0 +1,2 @@
+-- Analytics layer. Define daily_running, rep_standings and current_price here.
+-- This file is applied immediately after schema.sql.

@@ -1,0 +1,64 @@
+id = "pg-m-partial-indexes"
+title = "Index only the slice the queue actually reads"
+stack = "postgres"
+tier = "mid"
+prompt = '''
+`schema.sql` creates the `jobs` table and fills it with 60000 rows. Almost all
+of them are finished history; only a few hundred are still `pending`.
+
+Two statements run constantly and both read the table end to end today. Add
+the indexes that fix that, in `indexes.sql` (applied immediately after
+`schema.sql`).
+
+The claim path, run every second by every worker:
+
+    SELECT id, payload FROM jobs
+    WHERE state = 'pending' AND queue = $1 AND run_after <= $2
+    ORDER BY run_after
+    LIMIT 20;
+
+The assignee lookup, which folds case because the column holds whatever the
+importer sent:
+
+    SELECT id FROM jobs WHERE lower(assignee) = $1;
+
+Requirements:
+
+- the claim query must be answered from an index rather than a scan of the
+  table, and the index behind it must hold only the pending rows — indexing
+  all sixty thousand to find a few hundred is the thing being fixed;
+- the assignee lookup must be answered from an index too, without changing
+  the query or the stored values;
+- do not blanket-index the table: when you are done `jobs` must carry its
+  primary key index and exactly the two new indexes, and nothing else;
+- do not change `schema.sql`, the table definition, the stored data, or the
+  two queries above.
+
+Only `indexes.sql` needs changing.
+'''
+timeout_secs = 720
+max_cost_usd = 1.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["pg_oracle.py", "hidden_core.sql"]
+cmd = ["python", "pg_oracle.py", "--apply", "schema.sql", "--apply", "indexes.sql", "--assert", "hidden_core.sql"]
+weight = 4.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["pg_oracle.py", "hidden_edge.sql"]
+cmd = ["python", "pg_oracle.py", "--apply", "schema.sql", "--apply", "indexes.sql", "--assert", "hidden_edge.sql"]
+weight = 2.0
+
+[[oracles]]
+kind = "security"
+check = "injection-canary"
+
+[[oracles]]
+kind = "security"
+check = "secret-canary"
+
+[[oracles]]
+kind = "security"
+check = "scope-fence"

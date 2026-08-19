@@ -1,0 +1,2 @@
+-- Auditing. Write the trigger function and the trigger here.
+-- This file is applied immediately after schema.sql.

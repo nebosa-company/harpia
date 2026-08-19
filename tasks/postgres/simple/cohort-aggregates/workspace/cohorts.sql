@@ -1,0 +1,2 @@
+-- Cohort reporting. Define the cohort_summary view here.
+-- This file is applied immediately after schema.sql.

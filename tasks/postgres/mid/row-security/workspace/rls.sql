@@ -1,0 +1,2 @@
+-- Tenant isolation. Write the row-level security setup here.
+-- This file is applied immediately after schema.sql.

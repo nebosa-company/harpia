@@ -1,0 +1,2 @@
+-- Contact normalisation. Define the clean_contacts view here.
+-- This file is applied immediately after schema.sql.

@@ -1,0 +1,1 @@
+-- Any indexes the rewritten views need. Applied immediately after queries.sql.

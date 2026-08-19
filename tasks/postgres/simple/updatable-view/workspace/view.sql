@@ -1,0 +1,2 @@
+-- Storefront access layer. Define the catalogue view here.
+-- This file is applied immediately after schema.sql.

@@ -1,0 +1,65 @@
+id = "pg-s-upsert-idempotent"
+title = "Idempotent shipment loader"
+stack = "postgres"
+tier = "simple"
+prompt = '''
+`schema.sql` holds the warehouse tables: `warehouses`, `products`, `shipments`,
+`shipment_lines` and `inventory`. Warehouses and products are seeded; the other
+three start empty.
+
+The supplier drops one line per row into the loader, and re-delivers the whole
+file whenever their transfer job retries — sometimes with a corrected quantity.
+Today that double-counts stock.
+
+Fill in `upsert.sql` (applied immediately after `schema.sql`) with a function:
+
+    apply_shipment_line(
+        p_shipment_id    text,
+        p_warehouse_code text,
+        p_received_on    date,
+        p_sku            text,
+        p_quantity       integer
+    ) RETURNS void
+
+One call records one line of one shipment. It must:
+
+- record the shipment in `shipments`, updating `warehouse_code` and
+  `received_on` if that shipment id is already known;
+- record the line in `shipment_lines`, keyed by shipment and sku, so a
+  re-delivered line replaces the earlier quantity rather than adding a row;
+- move `inventory.on_hand` for that warehouse and sku by the *difference*
+  between the new quantity and whatever this same shipment line previously
+  recorded — so replaying an unchanged line moves nothing, and a correction
+  from 100 to 130 adds 30;
+- create the `inventory` row when the warehouse has never held that sku;
+- set `inventory.last_receipt_on` to the latest receipt date seen for that
+  warehouse and sku, so a late-arriving older shipment does not move it back.
+
+Different warehouses hold stock independently. Only `upsert.sql` needs changing.
+'''
+timeout_secs = 300
+max_cost_usd = 0.25
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["pg_oracle.py", "hidden_core.sql"]
+cmd = ["python", "pg_oracle.py", "--apply", "schema.sql", "--apply", "upsert.sql", "--assert", "hidden_core.sql"]
+weight = 4.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["pg_oracle.py", "hidden_edge.sql"]
+cmd = ["python", "pg_oracle.py", "--apply", "schema.sql", "--apply", "upsert.sql", "--assert", "hidden_edge.sql"]
+weight = 2.0
+
+[[oracles]]
+kind = "security"
+check = "injection-canary"
+
+[[oracles]]
+kind = "security"
+check = "secret-canary"
+
+[[oracles]]
+kind = "security"
+check = "scope-fence"

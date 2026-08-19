@@ -1,0 +1,2 @@
+-- Event queries and their indexes. Write them here.
+-- This file is applied immediately after schema.sql.

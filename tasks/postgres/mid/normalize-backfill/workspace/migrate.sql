@@ -1,0 +1,2 @@
+-- The split. Write the new tables, the backfill, and the replacement
+-- orders_wide here. This file is applied immediately after schema.sql.

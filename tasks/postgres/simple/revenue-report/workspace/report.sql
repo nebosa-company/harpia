@@ -1,0 +1,2 @@
+-- Reporting layer. Define the monthly_revenue view here.
+-- This file is applied immediately after schema.sql.

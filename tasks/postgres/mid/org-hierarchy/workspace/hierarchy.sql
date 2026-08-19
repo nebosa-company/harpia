@@ -1,0 +1,2 @@
+-- Directory queries. Define org_chart, reports_of and team_totals here.
+-- This file is applied immediately after schema.sql.
