@@ -69,6 +69,56 @@ pub fn write_links_md(workspace: &Path, link: &LinkConfig) -> Result<()> {
     std::fs::write(dir.join("links.md"), links_md(link)).context("writing links.md")
 }
 
+/// Patch the fenced `perp-binding` block that `perp init` wrote: declare a
+/// gate (perp refuses to run with none — "there is nothing to be green") and
+/// align the money budgets with the trial's cost ceiling. The gate is
+/// trivially green on purpose: Harpia's oracles do the real grading.
+pub fn patch_binding(workspace: &Path, gate_test: &str, money: f64) -> Result<()> {
+    let path = workspace.join(".harness").join("binding.md");
+    let body = std::fs::read_to_string(&path).context("reading binding.md")?;
+    let mut out = String::with_capacity(body.len() + 128);
+    let mut in_block = false;
+    let mut gate_written = false;
+    for line in body.lines() {
+        let trimmed = line.trim();
+        if trimmed == "```perp-binding" {
+            in_block = true;
+            out.push_str(line);
+            out.push('\n');
+            continue;
+        }
+        if in_block && trimmed == "```" {
+            if !gate_written {
+                let _ = writeln!(out, "gate.test = {gate_test}");
+            }
+            in_block = false;
+            out.push_str(line);
+            out.push('\n');
+            continue;
+        }
+        if in_block {
+            if trimmed.starts_with("# gate.test") || trimmed.starts_with("gate.test") {
+                if !gate_written {
+                    let _ = writeln!(out, "gate.test = {gate_test}");
+                    gate_written = true;
+                }
+                continue;
+            }
+            if trimmed.starts_with("budget.cycle.money") {
+                let _ = writeln!(out, "budget.cycle.money   = {money:.2}");
+                continue;
+            }
+            if trimmed.starts_with("budget.batch.money") {
+                let _ = writeln!(out, "budget.batch.money   = {money:.2}");
+                continue;
+            }
+        }
+        out.push_str(line);
+        out.push('\n');
+    }
+    std::fs::write(&path, out).context("writing binding.md")
+}
+
 /// Append a requirement row so `perp run --requirement <id>` has a record.
 /// Creates the file with its table header when `perp init` did not.
 pub fn mint_requirement(workspace: &Path, req_id: &str, title: &str) -> Result<()> {

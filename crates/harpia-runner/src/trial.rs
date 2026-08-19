@@ -77,6 +77,10 @@ pub fn run_trial(task: &TaskDir, cfg: &TrialConfig) -> Result<TrialResult> {
     let started = Instant::now();
     let harness = spawn_harness(cfg.manifest, &argv, &ws, Duration::from_secs(task.spec.timeout_secs))?;
     let wall_ms = started.elapsed().as_millis() as u64;
+    // Always persisted while the sandbox lives: the only forensic record of
+    // a harness that failed before leaving telemetry.
+    let _ = std::fs::write(sandbox.join("harness.stdout.txt"), &harness.stdout);
+    let _ = std::fs::write(sandbox.join("harness.stderr.txt"), &harness.stderr);
 
     // Telemetry: stdout, or a file the harness left in the workspace.
     let raw = match &cfg.manifest.telemetry_path {
@@ -149,6 +153,7 @@ fn perpetum_setup(cfg: &TrialConfig, ws: &Path, task: &TaskDir) -> Result<()> {
         link.effort = cfg.effort.map(str::to_string);
     }
     perpetum::write_links_md(ws, &link)?;
+    perpetum::patch_binding(ws, "cmd /c exit 0", task.spec.max_cost_usd.unwrap_or(1.0))?;
     perpetum::mint_requirement(ws, "R-1", &task.spec.title)
 }
 
