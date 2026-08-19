@@ -5,7 +5,7 @@
 use crate::tasks::{copy_tree, TaskDir};
 use crate::to_slash;
 use anyhow::{Context, Result};
-use harpia_core::metrics::{Outcome, Telemetry};
+use harpia_core::metrics::{ModelCall, Outcome, Telemetry, ToolCall};
 use harpia_harness::{parsers, perpetum, Lifecycle, Manifest, TrialVars};
 use harpia_oracle::{exec, run_oracles, security, OracleCtx, OracleOutcome};
 use std::io::Read;
@@ -29,9 +29,38 @@ pub struct TrialResult {
     pub attempt: u32,
     pub outcome: Outcome,
     pub telemetry: Telemetry,
-    pub tools: Vec<(String, bool)>,
+    pub tools: Vec<ToolCall>,
+    pub model_calls: Vec<ModelCall>,
     pub oracles: Vec<OracleOutcome>,
     pub diff_stat: String,
+    pub started_epoch: i64,
+    pub finished_epoch: i64,
+    pub rung: Option<String>,
+    pub steps: u64,
+    pub stop_reason: Option<String>,
+}
+
+fn now_epoch() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0)
+}
+
+/// Perpetum prints a parseable summary on stdout that its journal does not
+/// carry: which rung the turn reached, and why the run stopped.
+fn scrape_perpetum_stdout(out: &str) -> (Option<String>, Option<String>) {
+    let rung = out
+        .lines()
+        .filter_map(|l| l.trim().strip_prefix("turn: "))
+        .filter_map(|l| l.split_whitespace().next())
+        .last()
+        .map(str::to_string);
+    let stop = out
+        .lines()
+        .find_map(|l| l.split("stopped: ").nth(1))
+        .map(|s| s.trim().to_string());
+    (rung, stop)
 }
 
 pub fn run_trial(task: &TaskDir, cfg: &TrialConfig) -> Result<TrialResult> {
@@ -78,6 +107,7 @@ pub fn run_trial(task: &TaskDir, cfg: &TrialConfig) -> Result<TrialResult> {
     };
     let argv = cfg.manifest.argv(&vars);
 
+    let started_epoch = now_epoch();
     let started = Instant::now();
     let harness = spawn_harness(cfg.manifest, &argv, &ws, Duration::from_secs(task.spec.timeout_secs))?;
     let wall_ms = started.elapsed().as_millis() as u64;
@@ -113,6 +143,7 @@ pub fn run_trial(task: &TaskDir, cfg: &TrialConfig) -> Result<TrialResult> {
     let parsed = parsers::parse(cfg.manifest.telemetry, &raw);
     let mut telemetry = parsed.telemetry;
     telemetry.wall_ms = wall_ms;
+    let (scraped_rung, scraped_stop) = scrape_perpetum_stdout(&harness.stdout);
 
     let outcome = if harness.timed_out {
         Outcome::Timeout
@@ -148,8 +179,14 @@ pub fn run_trial(task: &TaskDir, cfg: &TrialConfig) -> Result<TrialResult> {
         outcome,
         telemetry,
         tools: parsed.tools,
+        model_calls: parsed.model_calls,
         oracles,
         diff_stat,
+        started_epoch,
+        finished_epoch: now_epoch(),
+        rung: parsed.rung.or(scraped_rung),
+        steps: parsed.steps,
+        stop_reason: parsed.stop_reason.or(scraped_stop),
     })
 }
 

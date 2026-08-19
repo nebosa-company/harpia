@@ -4,15 +4,24 @@
 //! `malformed` — missing accounting is a defect, never a silent zero.
 
 use crate::TelemetryKind;
-use harpia_core::metrics::Telemetry;
+use harpia_core::metrics::{ModelCall, Telemetry, ToolCall};
 use serde_json::Value;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct ParsedRun {
     pub telemetry: Telemetry,
-    /// (tool name, ok) in call order.
-    pub tools: Vec<(String, bool)>,
+    /// Tool calls in order, with whatever context the harness reported.
+    pub tools: Vec<ToolCall>,
+    /// Per-call model accounting. Empty when the harness reports only totals
+    /// -- that emptiness is a recorded fact, not an assumed zero.
+    pub model_calls: Vec<ModelCall>,
+    /// How the harness reached its tools, where it says so.
+    pub rung: Option<String>,
+    /// Why it stopped, in its own words.
+    pub stop_reason: Option<String>,
+    /// Distinct harness-internal steps seen.
+    pub steps: u64,
 }
 
 pub fn parse(kind: TelemetryKind, raw: &str) -> ParsedRun {
@@ -31,34 +40,64 @@ fn perpetum_journal(raw: &str) -> ParsedRun {
     let mut out = ParsedRun::default();
     let mut cost = 0.0;
     let mut any_cost = false;
+    let mut steps = std::collections::BTreeSet::new();
     for line in raw.lines().filter(|l| !l.trim().is_empty()) {
         let Ok(v) = serde_json::from_str::<Value>(line) else { continue };
+        if let Some(step) = v.get("step").and_then(Value::as_str) {
+            steps.insert(step.to_string());
+        }
         let is_model_call = v.get("model").is_some() && v.get("output_tokens").is_some();
         if is_model_call {
+            let charge = f(&v, "charge");
+            let shadow = f(&v, "shadow");
+            // A subscription link bills nothing and reports the imputed price
+            // in `shadow`; recording which one it was keeps a $0 honest.
+            let is_shadow = charge == 0.0 && shadow > 0.0;
+            let c = if is_shadow { shadow } else { charge };
+            if v.get("charge").is_some() || v.get("shadow").is_some() {
+                any_cost = true;
+            }
+            cost += c;
             out.telemetry.requests += 1;
             out.telemetry.turns += 1;
             out.telemetry.input_tokens += u(&v, "cache_miss");
             out.telemetry.cache_read_tokens += u(&v, "cache_hit");
             out.telemetry.output_tokens += u(&v, "output_tokens");
-            let charge = f(&v, "charge");
-            let shadow = f(&v, "shadow");
-            let c = if charge > 0.0 { charge } else { shadow };
-            if v.get("charge").is_some() || v.get("shadow").is_some() {
-                any_cost = true;
-            }
-            cost += c;
+            out.model_calls.push(ModelCall {
+                at: v.get("at").and_then(Value::as_i64),
+                step: s_of(&v, "step"),
+                role: s_of(&v, "role"),
+                link: s_of(&v, "link"),
+                model: s_of(&v, "model"),
+                input_tokens: u(&v, "cache_miss"),
+                cache_read_tokens: u(&v, "cache_hit"),
+                cache_write_tokens: 0,
+                output_tokens: u(&v, "output_tokens"),
+                latency_ms: v.get("latency_ms").and_then(Value::as_u64),
+                cost_usd: (v.get("charge").is_some() || v.get("shadow").is_some()).then_some(c),
+                cost_is_shadow: is_shadow,
+                ok: v.get("ok").and_then(Value::as_bool).unwrap_or(true),
+            });
         } else if let Some(tool) = v.get("tool").and_then(Value::as_str) {
             let ok = v.get("ok").and_then(Value::as_bool).unwrap_or(false);
             out.telemetry.tool_calls += 1;
             if !ok {
                 out.telemetry.tool_errors += 1;
             }
-            out.tools.push((tool.to_string(), ok));
+            out.tools.push(ToolCall {
+                name: tool.to_string(),
+                ok,
+                about: s_of(&v, "about"),
+                bytes: v.get("bytes").and_then(Value::as_u64),
+                refusal: s_of(&v, "refusal"),
+                step: s_of(&v, "step"),
+            });
         }
     }
     if any_cost {
         out.telemetry.cost_usd = Some(cost);
     }
+    out.steps = steps.len() as u64;
     out
 }
 
@@ -81,7 +120,7 @@ fn claude_stream_json(raw: &str) -> ParsedRun {
                             .unwrap_or("unknown")
                             .to_string();
                         out.telemetry.tool_calls += 1;
-                        out.tools.push((name, true));
+                        out.tools.push(ToolCall { name, ok: true, ..Default::default() });
                         if let Some(id) = block.get("id").and_then(Value::as_str) {
                             by_id.insert(id.to_string(), out.tools.len() - 1);
                         }
@@ -99,7 +138,7 @@ fn claude_stream_json(raw: &str) -> ParsedRun {
                             .and_then(Value::as_str)
                             .and_then(|id| by_id.get(id))
                         {
-                            out.tools[*idx].1 = false;
+                            out.tools[*idx].ok = false;
                         }
                     }
                 }
@@ -115,6 +154,7 @@ fn claude_stream_json(raw: &str) -> ParsedRun {
                 if let Some(c) = v.get("total_cost_usd").and_then(Value::as_f64) {
                     out.telemetry.cost_usd = Some(c);
                 }
+                out.stop_reason = s_of(&v, "subtype");
                 if out.telemetry.wall_ms == 0 {
                     out.telemetry.wall_ms = u(&v, "duration_ms");
                 }
@@ -141,6 +181,16 @@ fn usage_jsonl(raw: &str) -> ParsedRun {
         out.telemetry.output_tokens += u(&v, "output_tokens");
         out.telemetry.cache_read_tokens += u(&v, "cache_read_tokens");
         out.telemetry.cache_write_tokens += u(&v, "cache_write_tokens");
+        out.model_calls.push(ModelCall {
+            model: s_of(&v, "model").or_else(|| s_of(&v, "response_model")),
+            input_tokens: u(&v, "input_tokens"),
+            cache_read_tokens: u(&v, "cache_read_tokens"),
+            cache_write_tokens: u(&v, "cache_write_tokens"),
+            output_tokens: u(&v, "output_tokens"),
+            latency_ms: v.get("latency_ms").and_then(Value::as_u64),
+            ok: v.get("status").and_then(Value::as_u64).map(|s| s < 400).unwrap_or(true),
+            ..Default::default()
+        });
     }
     out
 }
@@ -157,6 +207,10 @@ fn content_blocks(event: &Value) -> impl Iterator<Item = &Value> {
 
 fn u(v: &Value, key: &str) -> u64 {
     v.get(key).and_then(Value::as_u64).unwrap_or(0)
+}
+
+fn s_of(v: &Value, key: &str) -> Option<String> {
+    v.get(key).and_then(Value::as_str).map(str::to_string)
 }
 
 fn f(v: &Value, key: &str) -> f64 {
@@ -184,7 +238,18 @@ mod tests {
         assert_eq!(p.telemetry.output_tokens, 147 + 143);
         assert_eq!(p.telemetry.tool_calls, 2);
         assert_eq!(p.telemetry.tool_errors, 1);
-        assert_eq!(p.tools, vec![("shell".into(), true), ("shell".into(), false)]);
+        let names: Vec<_> = p.tools.iter().map(|t| (t.name.as_str(), t.ok)).collect();
+        assert_eq!(names, vec![("shell", true), ("shell", false)]);
+        assert_eq!(p.tools[0].about.as_deref(), Some("git status"));
+        assert_eq!(p.tools[0].bytes, Some(332));
+        assert_eq!(p.tools[1].refusal.as_deref(), Some("rule"));
+        // per-call grain the cross-round reports need
+        assert_eq!(p.model_calls.len(), 2);
+        assert_eq!(p.model_calls[0].latency_ms, Some(1206));
+        assert_eq!(p.model_calls[0].role.as_deref(), Some("chat"));
+        assert_eq!(p.model_calls[1].link.as_deref(), Some("claude-deep"));
+        assert!(p.model_calls[1].cost_is_shadow, "subscription link is shadow-priced");
+        assert_eq!(p.steps, 4, "distinct step ids (two lines share c15/b1/s249)");
         // charge where real, shadow where the link is subscription
         assert!((p.telemetry.cost_usd.unwrap() - (4.4e-05 + 0.021)).abs() < 1e-12);
     }
@@ -208,7 +273,9 @@ mod tests {
         assert_eq!(p.telemetry.requests, 2);
         assert_eq!(p.telemetry.tool_calls, 2);
         assert_eq!(p.telemetry.tool_errors, 1);
-        assert_eq!(p.tools, vec![("Bash".into(), false), ("Edit".into(), true)]);
+        let names: Vec<_> = p.tools.iter().map(|t| (t.name.as_str(), t.ok)).collect();
+        assert_eq!(names, vec![("Bash", false), ("Edit", true)]);
+        assert_eq!(p.stop_reason.as_deref(), Some("success"));
         assert_eq!(p.telemetry.cost_usd, Some(0.91));
         assert!((p.telemetry.cache_hit_ratio().unwrap() - 50000.0 / 51200.0).abs() < 1e-9);
     }
@@ -224,6 +291,7 @@ mod tests {
         assert_eq!(p.telemetry.requests, 2);
         assert_eq!(p.telemetry.input_tokens, 130);
         assert_eq!(p.telemetry.cache_read_tokens, 900);
+        assert_eq!(p.model_calls.len(), 2, "proxy gives one call per request");
     }
 
     #[test]

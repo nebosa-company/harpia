@@ -73,3 +73,28 @@ CREATE TABLE IF NOT EXISTS price (
 
 CREATE INDEX IF NOT EXISTS idx_trial_round ON trial(round_id);
 CREATE INDEX IF NOT EXISTS idx_trial_task ON trial(task_id);
+
+-- ---- schema v2: the grain cross-round reports need ----
+-- Fresh databases get these columns from the ALTERs in migrate(); the table
+-- below is new, so it is declared here.
+
+CREATE TABLE IF NOT EXISTS model_call (
+    trial_id    INTEGER NOT NULL REFERENCES trial(id),
+    seq         INTEGER NOT NULL,
+    at          INTEGER,                   -- epoch seconds, as the harness logged it
+    step        TEXT,                      -- harness-internal step id
+    role        TEXT,                      -- coder | verifier | chat | ...
+    link        TEXT,                      -- which configured link carried it
+    model       TEXT,                      -- model as named on this call
+    input_tokens        INTEGER NOT NULL DEFAULT 0,
+    cache_read_tokens   INTEGER NOT NULL DEFAULT 0,
+    cache_write_tokens  INTEGER NOT NULL DEFAULT 0,
+    output_tokens       INTEGER NOT NULL DEFAULT 0,
+    latency_ms  INTEGER,
+    cost_usd    REAL,
+    cost_is_shadow INTEGER NOT NULL DEFAULT 0,
+    ok          INTEGER NOT NULL DEFAULT 1,
+    PRIMARY KEY (trial_id, seq)
+);
+
+CREATE INDEX IF NOT EXISTS idx_model_call_trial ON model_call(trial_id);

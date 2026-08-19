@@ -258,14 +258,20 @@ mod tests {
                     ("security".into(), true, 1.0, None),
                 ],
                 tools: &[],
+                model_calls: &[],
+                started_epoch: None,
+                finished_epoch: None,
+                rung: None,
+                steps: None,
+                stop_reason: None,
             })
             .unwrap();
     }
 
     fn seeded() -> (Store, i64, i64) {
         let mut s = Store::open_in_memory().unwrap();
-        s.upsert_harness("ha", "0", "").unwrap();
-        s.upsert_harness("hb", "0", "").unwrap();
+        s.upsert_harness("ha", "0", None, "").unwrap();
+        s.upsert_harness("hb", "0", None, "").unwrap();
         for t in ["t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8"] {
             s.upsert_task(t, "rust", "simple", t, "").unwrap();
         }

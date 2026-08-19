@@ -2,13 +2,58 @@
 //! every write inside a transaction so a killed run never corrupts a round.
 
 use anyhow::{Context, Result};
-use harpia_core::metrics::{Outcome, Telemetry};
+use harpia_core::metrics::{ModelCall, Outcome, Telemetry, ToolCall};
 use harpia_core::scoring::{self, OracleVerdict};
 use rusqlite::{params, Connection};
 use std::collections::HashSet;
 use std::path::Path;
 
 pub const SCHEMA: &str = include_str!("schema.sql");
+
+
+/// Columns added after v1. `ALTER TABLE ADD COLUMN` is the only safe
+/// migration SQLite gives us, so each is attempted and a duplicate-column
+/// error is the expected no-op on an already-migrated database.
+const V2_COLUMNS: &[(&str, &str)] = &[
+    // Identity and provenance the cross-round reports print verbatim.
+    ("harness", "harness_version TEXT"),
+    ("round", "link_kind TEXT"),
+    ("round", "model_wire TEXT"),
+    ("round", "params TEXT"),
+    ("round", "thinking TEXT"),
+    ("round", "jobs INTEGER"),
+    ("round", "corpus_size INTEGER"),
+    ("round", "harpia_version TEXT"),
+    // Real clock, so elapsed and idle time are arithmetic rather than prose.
+    ("round", "started_epoch INTEGER"),
+    ("round", "finished_epoch INTEGER"),
+    ("trial", "started_epoch INTEGER"),
+    ("trial", "finished_epoch INTEGER"),
+    // How the harness reached its tools, where it reports it.
+    ("trial", "rung TEXT"),
+    ("trial", "steps INTEGER"),
+    ("trial", "stop_reason TEXT"),
+    // Why a tool call failed, not just that it did.
+    ("tool_call", "about TEXT"),
+    ("tool_call", "bytes INTEGER"),
+    ("tool_call", "refusal TEXT"),
+    ("tool_call", "step TEXT"),
+    // Which oracles are slow, and which cost the most points.
+    ("oracle_result", "duration_ms INTEGER"),
+];
+
+fn migrate(conn: &Connection) -> Result<()> {
+    for (table, column) in V2_COLUMNS {
+        let sql = format!("ALTER TABLE {table} ADD COLUMN {column}");
+        match conn.execute(&sql, []) {
+            Ok(_) => {}
+            // "duplicate column name" -- already migrated.
+            Err(rusqlite::Error::SqliteFailure(_, Some(msg))) if msg.contains("duplicate column") => {}
+            Err(e) => return Err(e).with_context(|| format!("migrating: {sql}")),
+        }
+    }
+    Ok(())
+}
 
 pub struct Store {
     pub conn: Connection,
@@ -25,8 +70,20 @@ pub struct TrialRecord<'a> {
     /// (kind, passed, weight, detail) in oracle order. kind "security" feeds
     /// the security score; everything else feeds capability.
     pub oracles: &'a [(String, bool, f64, Option<String>)],
-    /// (tool name, ok) in call order.
-    pub tools: &'a [(String, bool)],
+    /// Tool calls in order, with whatever context the harness reported.
+    pub tools: &'a [ToolCall],
+    /// Per-call model accounting; empty when the harness reports only totals.
+    pub model_calls: &'a [ModelCall],
+    /// Wall-clock bounds, epoch seconds — lets a report separate elapsed
+    /// round time from time the machine was actually busy.
+    pub started_epoch: Option<i64>,
+    pub finished_epoch: Option<i64>,
+    /// How the harness reached its tools, where it says: `native` | `prompted`.
+    pub rung: Option<&'a str>,
+    /// Harness-internal steps executed, where it reports them.
+    pub steps: Option<u64>,
+    /// Why the harness stopped, in its own words.
+    pub stop_reason: Option<&'a str>,
 }
 
 /// A trial as the report side reads it: telemetry plus derived scores.
@@ -39,6 +96,29 @@ pub struct TrialRow {
     pub telemetry: Telemetry,
     pub capability: f64,
     pub security: f64,
+}
+
+/// Everything known about a round when it starts.
+#[derive(Debug, Clone, Default)]
+pub struct RoundStart<'a> {
+    pub label: &'a str,
+    pub harness_id: &'a str,
+    pub model: &'a str,
+    pub effort: Option<&'a str>,
+    pub tasks_sha: &'a str,
+    pub started_at: &'a str,
+    /// Link kind carrying the model: `deepseek`, `claude-cli`, `lmstudio`, ...
+    pub link_kind: Option<&'a str>,
+    /// Model id the provider actually reported, which can differ from the
+    /// configured one — an alias resolving to something else is worth seeing.
+    pub model_wire: Option<&'a str>,
+    /// Request parameters as JSON, verbatim.
+    pub params: Option<&'a str>,
+    pub thinking: Option<&'a str>,
+    pub jobs: Option<u32>,
+    pub corpus_size: Option<u32>,
+    pub harpia_version: Option<&'a str>,
+    pub started_epoch: Option<i64>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -66,6 +146,7 @@ impl Store {
         conn.pragma_update(None, "synchronous", "NORMAL")?;
         conn.pragma_update(None, "foreign_keys", "ON")?;
         conn.execute_batch(SCHEMA)?;
+        migrate(&conn)?;
         Ok(Self { conn })
     }
 
@@ -73,16 +154,26 @@ impl Store {
         let conn = Connection::open_in_memory()?;
         conn.pragma_update(None, "foreign_keys", "ON")?;
         conn.execute_batch(SCHEMA)?;
+        migrate(&conn)?;
         Ok(Self { conn })
     }
 
     // ---- write path ----
 
-    pub fn upsert_harness(&self, id: &str, version: &str, manifest: &str) -> Result<()> {
+    /// `version` is Harpia's own; `harness_version` is what the harness
+    /// reports about itself (`perp 0.4.0`), which is what a report prints.
+    pub fn upsert_harness(
+        &self,
+        id: &str,
+        version: &str,
+        harness_version: Option<&str>,
+        manifest: &str,
+    ) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO harness (id, version, manifest) VALUES (?1, ?2, ?3)
-             ON CONFLICT(id) DO UPDATE SET version = ?2, manifest = ?3",
-            params![id, version, manifest],
+            "INSERT INTO harness (id, version, harness_version, manifest) VALUES (?1, ?2, ?3, ?4)
+             ON CONFLICT(id) DO UPDATE SET version = ?2,
+                harness_version = COALESCE(?3, harness.harness_version), manifest = ?4",
+            params![id, version, harness_version, manifest],
         )?;
         Ok(())
     }
@@ -105,10 +196,30 @@ impl Store {
         tasks_sha: &str,
         started_at: &str,
     ) -> Result<i64> {
+        self.begin_round_full(&RoundStart {
+            label,
+            harness_id,
+            model,
+            effort,
+            tasks_sha,
+            started_at,
+            ..Default::default()
+        })
+    }
+
+    /// Full round provenance: everything a cross-round report prints in its
+    /// identity block, so a reader can tell what was actually compared.
+    pub fn begin_round_full(&self, r: &RoundStart) -> Result<i64> {
         self.conn.execute(
-            "INSERT INTO round (label, harness_id, model, effort, tasks_sha, started_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-            params![label, harness_id, model, effort, tasks_sha, started_at],
+            "INSERT INTO round (label, harness_id, model, effort, tasks_sha, started_at,
+                link_kind, model_wire, params, thinking, jobs, corpus_size,
+                harpia_version, started_epoch)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14)",
+            params![
+                r.label, r.harness_id, r.model, r.effort, r.tasks_sha, r.started_at,
+                r.link_kind, r.model_wire, r.params, r.thinking, r.jobs, r.corpus_size,
+                r.harpia_version, r.started_epoch
+            ],
         )?;
         Ok(self.conn.last_insert_rowid())
     }
@@ -120,9 +231,13 @@ impl Store {
     }
 
     pub fn finish_round(&self, round_id: i64, finished_at: &str) -> Result<()> {
+        let epoch = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs() as i64)
+            .ok();
         self.conn.execute(
-            "UPDATE round SET finished_at = ?2 WHERE id = ?1",
-            params![round_id, finished_at],
+            "UPDATE round SET finished_at = ?2, finished_epoch = ?3 WHERE id = ?1",
+            params![round_id, finished_at, epoch],
         )?;
         Ok(())
     }
@@ -142,8 +257,9 @@ impl Store {
         tx.execute(
             "INSERT INTO trial (round_id, task_id, attempt, outcome, wall_ms,
                 input_tokens, output_tokens, cache_read_tokens, cache_write_tokens,
-                requests, turns, tool_calls, tool_errors, cost_usd, diff_stat)
-             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)",
+                requests, turns, tool_calls, tool_errors, cost_usd, diff_stat,
+                started_epoch, finished_epoch, rung, steps, stop_reason)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20)",
             params![
                 rec.round_id,
                 rec.task_id,
@@ -160,6 +276,11 @@ impl Store {
                 t.tool_errors,
                 t.cost_usd,
                 rec.diff_stat,
+                rec.started_epoch,
+                rec.finished_epoch,
+                rec.rung,
+                rec.steps,
+                rec.stop_reason,
             ],
         )?;
         let trial_id = tx.last_insert_rowid();
@@ -172,10 +293,26 @@ impl Store {
                 o.execute(params![trial_id, idx as i64, kind, *passed, *weight, detail])?;
             }
             let mut c = tx.prepare(
-                "INSERT INTO tool_call (trial_id, seq, name, ok) VALUES (?1, ?2, ?3, ?4)",
+                "INSERT INTO tool_call (trial_id, seq, name, ok, about, bytes, refusal, step)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             )?;
-            for (seq, (name, ok)) in rec.tools.iter().enumerate() {
-                c.execute(params![trial_id, seq as i64, name, *ok])?;
+            for (seq, t) in rec.tools.iter().enumerate() {
+                c.execute(params![
+                    trial_id, seq as i64, t.name, t.ok, t.about, t.bytes, t.refusal, t.step
+                ])?;
+            }
+            let mut m = tx.prepare(
+                "INSERT INTO model_call (trial_id, seq, at, step, role, link, model,
+                    input_tokens, cache_read_tokens, cache_write_tokens, output_tokens,
+                    latency_ms, cost_usd, cost_is_shadow, ok)
+                 VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)",
+            )?;
+            for (seq, c) in rec.model_calls.iter().enumerate() {
+                m.execute(params![
+                    trial_id, seq as i64, c.at, c.step, c.role, c.link, c.model,
+                    c.input_tokens, c.cache_read_tokens, c.cache_write_tokens,
+                    c.output_tokens, c.latency_ms, c.cost_usd, c.cost_is_shadow, c.ok
+                ])?;
             }
         }
         tx.commit()?;
@@ -329,7 +466,7 @@ mod tests {
 
     fn seeded_store() -> (Store, i64) {
         let mut s = Store::open_in_memory().unwrap();
-        s.upsert_harness("perpetum", "0.2.0", "id = \"perpetum\"").unwrap();
+        s.upsert_harness("perpetum", "0.1.0", Some("perp 0.4.0"), "id = \"perpetum\"").unwrap();
         s.upsert_task("rust-s-ring-buffer", "rust", "simple", "Ring buffer", "").unwrap();
         let round = s
             .begin_round("perp-flash-r1", "perpetum", "deepseek-v4-flash", None, "abc123", "2026-08-19T00:00:00Z")
@@ -347,7 +484,22 @@ mod tests {
                 ("hidden-tests".into(), true, 3.0, None),
                 ("security".into(), false, 1.0, Some("obeyed planted instruction".into())),
             ],
-            tools: &[("shell".into(), true), ("edit".into(), false)],
+            tools: &[
+                ToolCall { name: "shell".into(), ok: true, about: Some("git status".into()),
+                           bytes: Some(332), ..Default::default() },
+                ToolCall { name: "edit".into(), ok: false,
+                           refusal: Some("rule".into()), ..Default::default() },
+            ],
+            model_calls: &[ModelCall {
+                role: Some("coder".into()), link: Some("ds-fast".into()),
+                model: Some("deepseek-v4-flash".into()), latency_ms: Some(1206),
+                output_tokens: 200, cost_usd: Some(0.0123), ok: true, ..Default::default()
+            }],
+            started_epoch: Some(1_787_000_000),
+            finished_epoch: Some(1_787_000_042),
+            rung: Some("native"),
+            steps: Some(3),
+            stop_reason: Some("the backlog is exhausted"),
         })
         .unwrap();
         (s, round)
@@ -392,6 +544,12 @@ mod tests {
             diff_stat: None,
             oracles: &[],
             tools: &[],
+            model_calls: &[],
+            started_epoch: None,
+            finished_epoch: None,
+            rung: None,
+            steps: None,
+            stop_reason: None,
         });
         assert!(dup.is_err(), "UNIQUE(round_id, task_id, attempt) must hold");
     }

@@ -4,9 +4,9 @@
 
 use crate::tasks::TaskDir;
 use crate::trial::{run_trial, TrialConfig, TrialResult};
-use anyhow::{Context, Result};
+use anyhow::Result;
 use harpia_harness::Manifest;
-use harpia_store::{Store, TrialRecord};
+use harpia_store::{RoundStart, Store, TrialRecord};
 use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::sync::mpsc;
@@ -39,7 +39,15 @@ pub fn run_round(
     tasks: &[TaskDir],
     cfg: &RoundConfig,
 ) -> Result<RoundOutcome> {
-    store.upsert_harness(&manifest.id, env!("CARGO_PKG_VERSION"), &format!("{manifest:?}"))?;
+    // The harness's own version, not Harpia's -- a report prints "perp 0.4.0",
+    // and recording our version there made every harness look identical.
+    let harness_version = probe_harness_version(manifest);
+    store.upsert_harness(
+        &manifest.id,
+        env!("CARGO_PKG_VERSION"),
+        harness_version.as_deref(),
+        &format!("{manifest:?}"),
+    )?;
     for t in tasks {
         store.upsert_task(
             &t.spec.id,
@@ -52,14 +60,29 @@ pub fn run_round(
 
     let round_id = match store.round_id(&cfg.label)? {
         Some(id) => id,
-        None => store.begin_round(
-            &cfg.label,
-            &manifest.id,
-            &cfg.model,
-            cfg.effort.as_deref(),
-            &cfg.tasks_sha,
-            &now_iso(),
-        )?,
+        None => store.begin_round_full(&RoundStart {
+            label: &cfg.label,
+            harness_id: &manifest.id,
+            model: &cfg.model,
+            effort: cfg.effort.as_deref(),
+            tasks_sha: &cfg.tasks_sha,
+            started_at: &now_iso(),
+            link_kind: manifest
+                .perpetum_link
+                .as_ref()
+                .map(|l| l.kind.as_str())
+                .or(Some(match manifest.telemetry {
+                    harpia_harness::TelemetryKind::ClaudeStreamJson => "claude-code",
+                    harpia_harness::TelemetryKind::ProxyJsonl => "http-proxy",
+                    _ => "subprocess",
+                })),
+            params: Some(&format!("{:?}", manifest.command)),
+            jobs: Some(cfg.jobs as u32),
+            corpus_size: Some(tasks.len() as u32),
+            harpia_version: Some(env!("CARGO_PKG_VERSION")),
+            started_epoch: Some(now_epoch()),
+            ..Default::default()
+        })?,
     };
     let done = store.done_attempts(round_id)?;
 
@@ -146,6 +169,12 @@ pub fn run_round(
                 diff_stat: Some(&r.diff_stat),
                 oracles: &oracles,
                 tools: &r.tools,
+                model_calls: &r.model_calls,
+                started_epoch: Some(r.started_epoch),
+                finished_epoch: Some(r.finished_epoch),
+                rung: r.rung.as_deref(),
+                steps: Some(r.steps),
+                stop_reason: r.stop_reason.as_deref(),
             })?;
             eprintln!(
                 "  {} a{}: {} ({} oracles passed)",
@@ -160,6 +189,23 @@ pub fn run_round(
 
     store.finish_round(round_id, &now_iso())?;
     Ok(RoundOutcome { round_id, ran: total - failed, skipped, failed })
+}
+
+fn now_epoch() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0)
+}
+
+/// Ask the harness what version it is. Best-effort: a harness with no
+/// `--version` simply goes unrecorded rather than being guessed at.
+fn probe_harness_version(manifest: &Manifest) -> Option<String> {
+    let program = manifest.command.first()?;
+    let out = std::process::Command::new(program).arg("--version").output().ok()?;
+    let text = String::from_utf8_lossy(&out.stdout);
+    let line = text.lines().next()?.trim();
+    (!line.is_empty()).then(|| line.chars().take(80).collect())
 }
 
 fn now_iso() -> String {
