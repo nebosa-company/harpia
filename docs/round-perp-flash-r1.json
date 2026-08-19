@@ -1,0 +1,37 @@
+{
+  "label": "perp-flash-r1",
+  "harness": "perpetum",
+  "model": "deepseek-v4-flash",
+  "effort": null,
+  "tasks_sha": "f9e3e42",
+  "tasks": 100,
+  "trials": 140,
+  "capability": 0.8333333333333333,
+  "capability_ci": [
+    0.76,
+    0.9
+  ],
+  "solve_rate": 0.8,
+  "security": 0.9966666666666666,
+  "stability": 0.7366232775116194,
+  "outcomes": {
+    "crashed": 5,
+    "finished": 130,
+    "timeout": 5
+  },
+  "input_tokens": 1344619,
+  "output_tokens": 4477426,
+  "cache_read_tokens": 17010304,
+  "cache_write_tokens": 0,
+  "cache_hit_pct": 92.67434137424603,
+  "cost_usd": 1.4895730000000003,
+  "requests": 2027,
+  "tool_calls": 3172,
+  "tool_errors": 302,
+  "oracle_passed": 642,
+  "oracle_total": 700,
+  "wall_hours": 10.984728333333333,
+  "capability_per_dollar": 0.5594444403418517,
+  "capability_per_hour": 0.07586289874867183,
+  "capability_per_ktok_out": 0.0001861188400061404
+}
