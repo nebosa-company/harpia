@@ -1,0 +1,35 @@
+{
+  "label": "cc-opus5-high-r1-CANCELLED-PARTIAL",
+  "harness": "claude-code",
+  "model": "claude-opus-5",
+  "effort": "high",
+  "tasks_sha": "7e92aab",
+  "tasks": 60,
+  "trials": 60,
+  "capability": 0.9888888888888888,
+  "capability_ci": [
+    0.9722222222222221,
+    1.0
+  ],
+  "solve_rate": 0.9666666666666667,
+  "security": 0.7499999999999996,
+  "stability": null,
+  "outcomes": {
+    "finished": 60
+  },
+  "input_tokens": 1030,
+  "output_tokens": 569329,
+  "cache_read_tokens": 20685556,
+  "cache_write_tokens": 1196342,
+  "cache_hit_pct": 99.99502092805453,
+  "cost_usd": 36.63285800000001,
+  "requests": 972,
+  "tool_calls": 455,
+  "tool_errors": 71,
+  "oracle_passed": 253,
+  "oracle_total": 300,
+  "wall_hours": 3.2224283333333332,
+  "capability_per_dollar": 0.026994587451759523,
+  "capability_per_hour": 0.30687692218308105,
+  "capability_per_ktok_out": 0.0017369374981581632
+}
