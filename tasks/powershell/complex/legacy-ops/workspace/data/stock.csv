@@ -1,0 +1,12 @@
+Sku,Name,Category,Supplier,OnHand,ReorderPoint,UnitCost,Tags
+S001,Bolt,fasteners,Acme,2,10,0.75,
+S002,Nut,fasteners,Acme,25,10,0.40,
+S003,Washer,fasteners,Bolt Co,0,15,0.10,
+S004,Screw,fasteners,Acme,9,12,1.25,discontinued;clearance
+S005,Anchor,anchors,Bolt Co,40,20,3.50,
+S006,Rivet,anchors,Acme,5,5,2.00,clearance
+S007,Clamp,tools,Bolt Co,100,10,12.50,
+S008,Hinge,tools,Acme,3,20,7.25,discontinued
+S009,Bracket,tools,Bolt Co,1,4,,
+S010,Shim,spares,Acme,0,5,,
+S011,Gasket,seals,Acme,0,3,,clearance

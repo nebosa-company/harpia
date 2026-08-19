@@ -1,0 +1,44 @@
+{
+  "resources": [
+    {
+      "id": "conf-dir",
+      "type": "directory",
+      "path": "conf",
+      "ensure": "present"
+    },
+    {
+      "id": "app-settings",
+      "type": "json-patch",
+      "path": "conf/app.json",
+      "set": { "name": "site", "server.port": 8080, "debug": false },
+      "remove": ["legacy"]
+    },
+    {
+      "id": "allow-office",
+      "type": "line",
+      "path": "conf/allow.txt",
+      "ensure": "present",
+      "line": "10.0.0.7"
+    },
+    {
+      "id": "deny-loopback",
+      "type": "line",
+      "path": "conf/allow.txt",
+      "ensure": "absent",
+      "line": "127.0.0.1"
+    },
+    {
+      "id": "banner",
+      "type": "file",
+      "path": "conf/banner.txt",
+      "ensure": "present",
+      "content": "Site build-out\n"
+    },
+    {
+      "id": "scratch",
+      "type": "directory",
+      "path": "tmp",
+      "ensure": "absent"
+    }
+  ]
+}

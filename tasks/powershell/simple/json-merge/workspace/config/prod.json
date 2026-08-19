@@ -1,0 +1,13 @@
+{
+  "retries": 0,
+  "verbose": false,
+  "server": {
+    "host": "reports.internal",
+    "tls": {
+      "enabled": true
+    }
+  },
+  "tags": [ "prod" ],
+  "legacyMode": null,
+  "region": "eu-west"
+}

@@ -1,0 +1,23 @@
+{
+  "files": [
+    {
+      "path": "conf/app.ini",
+      "ensure": "present",
+      "content": "[app]\nname=demo\nport=8080\n"
+    },
+    {
+      "path": "bin/run.cmd",
+      "ensure": "present",
+      "content": "@echo off\necho running\n"
+    },
+    {
+      "path": "conf/legacy.ini",
+      "ensure": "absent"
+    },
+    {
+      "path": "logs/.keep",
+      "ensure": "present",
+      "content": ""
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Hello {{ customer }},
+
+Your account {{account}} was opened on {{ opened }}.
+Balance: {{balance}}
+Paperless: {{ paperless }}
+
+Questions? Reply to this message and quote {{account}}.

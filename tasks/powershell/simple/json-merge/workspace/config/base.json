@@ -1,0 +1,15 @@
+{
+  "name": "reporting",
+  "retries": 3,
+  "verbose": true,
+  "server": {
+    "host": "localhost",
+    "port": 8080,
+    "tls": {
+      "enabled": false,
+      "ca": "dev.pem"
+    }
+  },
+  "tags": [ "a", "b" ],
+  "legacyMode": true
+}

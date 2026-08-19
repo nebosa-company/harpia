@@ -1,0 +1,14 @@
+{
+  "/widgets": {
+    "statusCode": 200,
+    "body": { "items": ["w1", "w2"], "next": "/widgets?page=2" }
+  },
+  "/widgets?page=2": {
+    "statusCode": 200,
+    "body": { "items": ["w3", "w4"], "next": "/widgets?page=3" }
+  },
+  "/widgets?page=3": {
+    "statusCode": 200,
+    "body": { "items": ["w5"] }
+  }
+}

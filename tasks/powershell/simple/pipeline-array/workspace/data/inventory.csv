@@ -1,0 +1,9 @@
+Sku,Name,OnHand,Reorder
+S001,Bolt,2,10
+S002,Nut,25,10
+S003,Washer,0,15
+S004,Screw,9,12
+S005,Anchor,40,20
+S006,Rivet,5,5
+S007,Clamp,100,10
+S008,Hinge,3,20

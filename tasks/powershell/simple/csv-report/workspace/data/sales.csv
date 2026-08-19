@@ -1,0 +1,9 @@
+Region,Product,Units,UnitPrice,OrderDate
+North,Widget,10,12.50,2026-01-05
+South,Gadget,3,199.99,2026-01-06
+North,Gizmo,4,25.00,2026-01-07
+East,Widget,7,12.50,2026-01-08
+South,Widget,1,12.50,2026-01-09
+North,Widget,2,12.50,2026-01-10
+East,Doohickey,5,3.25,2026-01-11
+South,Gizmo,6,25.00,2026-01-12

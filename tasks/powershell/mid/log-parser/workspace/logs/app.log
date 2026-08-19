@@ -1,0 +1,10 @@
+2026-03-05T08:14:22Z [ERROR] billing - charge failed (dur=412ms)
+2026-03-05T08:14:25Z [INFO] billing - retry scheduled
+this line is not a log line
+2026-03-05T08:15:01Z [WARN] search - slow query (dur=1800ms)
+2026-03-05T08:15:04Z [INFO] search - cache warmed (dur=200ms)
+
+2026-03-05T08:16:00Z [ERROR] search - index unavailable
+2026-03-05T08:16:30Z [INFO] billing - charge accepted (dur=88ms)
+2026-03-05 08:17:00 [INFO] billing - wrong timestamp shape
+2026-03-05T08:17:10Z [TRACE] auth - token refreshed

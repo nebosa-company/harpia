@@ -1,0 +1,22 @@
+{
+  "targets": [
+    {
+      "name": "greet",
+      "inputs": ["src/hello.txt", "src/world.txt"],
+      "outputs": ["out/greet.txt"],
+      "command": "concat src/hello.txt src/world.txt > out/greet.txt"
+    },
+    {
+      "name": "shout",
+      "inputs": ["out/greet.txt"],
+      "outputs": ["out/shout.txt"],
+      "command": "upper out/greet.txt > out/shout.txt"
+    },
+    {
+      "name": "banner",
+      "inputs": ["src/border.txt", "out/shout.txt"],
+      "outputs": ["out/banner.txt"],
+      "command": "concat src/border.txt out/shout.txt src/border.txt > out/banner.txt"
+    }
+  ]
+}

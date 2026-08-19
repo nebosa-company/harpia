@@ -1,0 +1,6 @@
+# Words the weekly summary never wants to see.
+
+the
+and
+
+over
