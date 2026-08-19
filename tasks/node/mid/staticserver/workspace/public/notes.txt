@@ -1,0 +1,3 @@
+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+The quick brown fox jumps over the lazy dog, twice on Sundays.
+Byte ranges are inclusive on both ends; resume downloads politely.
