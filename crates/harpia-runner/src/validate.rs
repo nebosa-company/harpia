@@ -41,7 +41,10 @@ fn score_variant(
     overlay_solution: bool,
     timeout: Duration,
 ) -> Result<f64> {
-    let ws = scratch.join(format!("{}-{name}", task.spec.id));
+    // Process id in the path: two concurrent `harpia validate` runs that
+    // happen to cover the same task would otherwise share one directory and
+    // silently corrupt each other's verdicts.
+    let ws = scratch.join(format!("{}-{name}-{}", task.spec.id, std::process::id()));
     let _ = std::fs::remove_dir_all(&ws);
     copy_tree(&task.workspace_dir(), &ws)?;
     if overlay_solution {
