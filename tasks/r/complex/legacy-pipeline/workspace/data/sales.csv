@@ -1,0 +1,7 @@
+region,product,qty,price
+north,widget,12.5,2.50
+south,widget,7,2.50
+north,gadget,3.5,10.00
+eastern,widget,20,2.50
+south,gadget,-,10.00
+north,widget,8,2.50
