@@ -2,12 +2,16 @@
 # the machinery Perpetum's `claude-cli` link deliberately suppresses.
 # Runs headless in the sandbox; stream-json carries usage and cost.
 id = "claude-code"
+# The bare `claude` on PATH is an npm .cmd shim CreateProcess cannot spawn;
+# the shim's own target is this native exe.
 command = [
-    "claude",
+    "C:/Users/gaddl/AppData/Roaming/npm/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
     "-p", "{prompt}",
     "--model", "{model}",
+    "--effort", "{effort}",
     "--output-format", "stream-json",
     "--verbose",
-    "--permission-mode", "acceptEdits",
+    "--dangerously-skip-permissions",
+    "--strict-mcp-config",
 ]
 telemetry = "claude-stream-json"
