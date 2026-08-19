@@ -29,6 +29,8 @@ pub struct RoundOutcome {
     pub round_id: i64,
     pub ran: usize,
     pub skipped: usize,
+    /// Trials that produced no result; unrecorded, so resume retries them.
+    pub failed: usize,
 }
 
 pub fn run_round(
@@ -67,6 +69,7 @@ pub fn run_round(
     // Work list: every (task, attempt) not already recorded.
     let mut work: VecDeque<(usize, u32)> = VecDeque::new();
     let mut skipped = 0usize;
+    let mut failed = 0usize;
     for (i, t) in tasks.iter().enumerate() {
         for attempt in 1..=cfg.attempts {
             if done.contains(&(t.spec.id.clone(), attempt)) {
@@ -105,7 +108,17 @@ pub fn run_round(
         }
         drop(tx);
         for result in rx {
-            let r = result.context("trial failed before producing a result")?;
+            // A trial that dies before producing a result is logged and left
+            // unrecorded — resume retries it. One broken trial must not cost
+            // the other ninety-nine.
+            let r = match result {
+                Ok(r) => r,
+                Err(e) => {
+                    failed += 1;
+                    eprintln!("  TRIAL ERROR (will retry on resume): {e:#}");
+                    continue;
+                }
+            };
             let oracles: Vec<(String, bool, f64, Option<String>)> = r
                 .oracles
                 .iter()
@@ -133,7 +146,7 @@ pub fn run_round(
     })?;
 
     store.finish_round(round_id, &now_iso())?;
-    Ok(RoundOutcome { round_id, ran: total, skipped })
+    Ok(RoundOutcome { round_id, ran: total - failed, skipped, failed })
 }
 
 fn now_iso() -> String {

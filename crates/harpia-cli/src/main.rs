@@ -130,7 +130,14 @@ fn main() -> Result<()> {
                     oracle_timeout_secs: oracle_timeout,
                 },
             )?;
-            eprintln!("round #{}: ran {}, resumed past {}", out.round_id, out.ran, out.skipped);
+            eprintln!(
+                "round #{}: ran {}, resumed past {}, errored {}",
+                out.round_id, out.ran, out.skipped, out.failed
+            );
+            if out.failed > 0 {
+                eprintln!("errored trials are unrecorded; re-run the same label to retry them");
+                std::process::exit(3);
+            }
             Ok(())
         }
         Cmd::Validate { tasks, oracle_timeout, filter } => {

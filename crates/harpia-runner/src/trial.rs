@@ -35,9 +35,13 @@ pub struct TrialResult {
 }
 
 pub fn run_trial(task: &TaskDir, cfg: &TrialConfig) -> Result<TrialResult> {
-    let sandbox = cfg
-        .sandbox_root
-        .join(format!("{}-a{}", task.spec.id, cfg.attempt));
+    // Absolute, because pieces of this path are handed to child processes
+    // (perp's --root, prompt_file) that resolve relative paths against their
+    // own cwd — which is the workspace, not ours.
+    let sandbox = std::path::absolute(
+        cfg.sandbox_root
+            .join(format!("{}-a{}", task.spec.id, cfg.attempt)),
+    )?;
     let _ = std::fs::remove_dir_all(&sandbox);
     std::fs::create_dir_all(&sandbox)?;
 
