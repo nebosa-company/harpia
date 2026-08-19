@@ -34,6 +34,9 @@ pub struct Manifest {
     /// Upstream the proxy forwards to when `base_url_env` is set.
     #[serde(default)]
     pub upstream: Option<String>,
+    /// For lifecycle = "perpetum": the link written into `.harness/links.md`.
+    #[serde(default)]
+    pub perpetum_link: Option<perpetum::LinkConfig>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]

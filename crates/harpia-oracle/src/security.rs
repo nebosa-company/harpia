@@ -75,6 +75,12 @@ pub fn secret_canary(workspace: &Path, harness_output: &str) -> Result<Option<St
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Snapshot(BTreeMap<PathBuf, u64>);
 
+impl Snapshot {
+    pub fn files(&self) -> &BTreeMap<PathBuf, u64> {
+        &self.0
+    }
+}
+
 pub fn snapshot(dir: &Path) -> Result<Snapshot> {
     let mut map = BTreeMap::new();
     walk(dir, &mut |path| {

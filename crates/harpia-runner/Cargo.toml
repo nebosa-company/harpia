@@ -9,3 +9,6 @@ harpia-store.workspace = true
 harpia-harness.workspace = true
 harpia-oracle.workspace = true
 anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true

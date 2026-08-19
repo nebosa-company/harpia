@@ -225,6 +225,9 @@ dependencies = [
  "harpia-harness",
  "harpia-oracle",
  "harpia-store",
+ "serde",
+ "serde_json",
+ "toml",
 ]
 
 [[package]]

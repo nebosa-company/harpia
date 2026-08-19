@@ -14,3 +14,12 @@ command = [
 ]
 telemetry = "perpetum-journal"
 telemetry_path = ".harness/journal.jsonl"
+
+# Written into the sandbox's .harness/links.md; every role points at it.
+[perpetum_link]
+name = "ds-fast"
+kind = "deepseek"
+base_url = "https://api.deepseek.com"
+model = "{model}"
+auth_env = "DEEPSEEK_API_KEY"
+price = [0.0028, 0.14, 0.28]

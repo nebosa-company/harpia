@@ -5,19 +5,25 @@
 //! record.
 
 use anyhow::{Context, Result};
+use serde::Deserialize;
 use std::fmt::Write as _;
 use std::path::Path;
 
 /// One model link plus the role table pointing every role at it.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct LinkConfig {
     pub name: String,
     pub kind: String,
+    #[serde(default)]
     pub base_url: Option<String>,
+    /// `{model}` is substituted with the round's model at trial time.
     pub model: String,
+    #[serde(default)]
     pub auth_env: Option<String>,
+    #[serde(default)]
     pub effort: Option<String>,
     /// (cache_hit, cache_miss, output) in USD per MTok.
+    #[serde(default)]
     pub price: Option<(f64, f64, f64)>,
 }
 
