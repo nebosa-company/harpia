@@ -101,7 +101,20 @@ pub fn run_round(
                     keep_sandbox: cfg.keep_sandbox,
                     oracle_timeout: Duration::from_secs(cfg.oracle_timeout_secs),
                 };
-                if tx.send(run_trial(&tasks[i], &tcfg)).is_err() {
+                // A panic inside one trial must not take the round down with
+                // it — round 3 died at trial 47 to a UTF-8 slice panic.
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    run_trial(&tasks[i], &tcfg)
+                }))
+                .unwrap_or_else(|p| {
+                    let msg = p
+                        .downcast_ref::<&str>()
+                        .map(|s| s.to_string())
+                        .or_else(|| p.downcast_ref::<String>().cloned())
+                        .unwrap_or_else(|| "opaque panic".into());
+                    Err(anyhow::anyhow!("trial panicked: {msg}"))
+                });
+                if tx.send(result).is_err() {
                     break;
                 }
             });

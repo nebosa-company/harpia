@@ -76,7 +76,13 @@ pub fn run_cmd(argv: &[String], cwd: &Path, timeout: Duration) -> Result<Run> {
     bytes.extend(err_h.join().unwrap_or_default());
     let text = String::from_utf8_lossy(&bytes);
     let tail = if text.len() > TAIL_CAP {
-        format!("…{}", &text[text.len() - TAIL_CAP..])
+        // Byte-indexed cut must land on a char boundary: test output is full
+        // of ✖-style glyphs, and slicing through one panics.
+        let mut cut = text.len() - TAIL_CAP;
+        while !text.is_char_boundary(cut) {
+            cut += 1;
+        }
+        format!("…{}", &text[cut..])
     } else {
         text.into_owned()
     };
