@@ -5,3 +5,4 @@
 /runs/
 /reports/build/
 .DS_Store
+*.bak

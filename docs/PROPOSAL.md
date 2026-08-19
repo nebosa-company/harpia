@@ -120,6 +120,13 @@ from treating missing accounting as zero instead of as a defect.
 
 ## 4. Benchmark-hygiene practices (benchmarks-for-benchmarks)
 
+> **Implemented and extended.** Everything in this section, plus item analysis,
+> rank-stability resampling, oracle mutation/metamorphic auditing, contamination
+> scanning, instrumentation cross-checks and a content-hash comparability guard,
+> now ships and is runnable: see [`docs/analyze/`](analyze/README.md) for the
+> design, the decisions, and what the machinery said the first time it was
+> pointed at the existing rounds.
+
 1. **Held-out oracles.** The harness never sees the tests. Hidden test files are
    injected into the sandbox *after* the harness exits. Prompts describe behavior,
    not test names.

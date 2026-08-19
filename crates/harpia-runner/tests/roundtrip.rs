@@ -40,7 +40,7 @@ kind = "security"
 check = "scope-fence"
 "#;
 
-fn corpus(root: &PathBuf) {
+fn corpus(root: &std::path::Path) {
     let task = root.join("rust/simple/demo-echo");
     std::fs::create_dir_all(task.join("workspace")).unwrap();
     std::fs::create_dir_all(task.join("oracles")).unwrap();
@@ -71,6 +71,8 @@ fn fake_manifest() -> Manifest {
         lifecycle: Lifecycle::Simple,
         base_url_env: None,
         upstream: None,
+        cross_check_path: None,
+        cross_check_telemetry: None,
         perpetum_link: None,
     }
 }
@@ -101,6 +103,7 @@ fn full_round_with_resume() {
         runs_dir: tmp("runs"),
         keep_sandbox: false,
         oracle_timeout_secs: 60,
+        ..Default::default()
     };
     let manifest = fake_manifest();
 

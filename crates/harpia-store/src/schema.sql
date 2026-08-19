@@ -98,3 +98,55 @@ CREATE TABLE IF NOT EXISTS model_call (
 );
 
 CREATE INDEX IF NOT EXISTS idx_model_call_trial ON model_call(trial_id);
+
+-- ---- schema v3: measuring the benchmark, not just with it ----
+-- Everything below exists so a claim about a harness can be audited: what the
+-- oracles actually accept, whether the corpus still validates, whether two
+-- rounds were run over the same bytes, and whether the tasks were ours.
+
+-- Oracle validity. A mutation that survives means the oracle accepts a wrong
+-- solution; a semantics-preserving rewrite that fails means it rejects a right
+-- one. Both are defects of the benchmark, recorded per task and dated.
+CREATE TABLE IF NOT EXISTS oracle_audit (
+    id          INTEGER PRIMARY KEY,
+    at_epoch    INTEGER NOT NULL,
+    task_id     TEXT NOT NULL,
+    content_sha TEXT,                      -- task content when audited
+    kind        TEXT NOT NULL,             -- 'mutation' | 'metamorphic'
+    operator    TEXT NOT NULL,             -- which transform was applied
+    target      TEXT NOT NULL,             -- file it was applied to
+    expected    TEXT NOT NULL,             -- 'fail' | 'pass'
+    observed    REAL NOT NULL,             -- capability the oracles gave
+    passed      INTEGER NOT NULL,          -- oracle behaved as it must
+    detail      TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_oracle_audit_task ON oracle_audit(task_id);
+
+-- Corpus validation over time. `harpia validate` writes one row per task per
+-- run, so toolchain drift shows up as a task that used to validate and no
+-- longer does, instead of as a mysteriously harder benchmark.
+CREATE TABLE IF NOT EXISTS corpus_check (
+    id                  INTEGER PRIMARY KEY,
+    at_epoch            INTEGER NOT NULL,
+    task_id             TEXT NOT NULL,
+    content_sha         TEXT,
+    solution_capability REAL NOT NULL,
+    starter_capability  REAL NOT NULL,
+    ok                  INTEGER NOT NULL,
+    toolchain           TEXT                -- JSON: probed tool versions
+);
+
+CREATE INDEX IF NOT EXISTS idx_corpus_check_task ON corpus_check(task_id);
+
+-- Contamination surface per task: its canary, whether that canary is unique
+-- across the corpus, and the closest match found against an external corpus.
+CREATE TABLE IF NOT EXISTS contamination (
+    task_id        TEXT PRIMARY KEY,
+    at_epoch       INTEGER NOT NULL,
+    canary         TEXT,
+    canary_unique  INTEGER,
+    max_similarity REAL,                   -- 0..1 shingle overlap
+    nearest_source TEXT,
+    corpus_label   TEXT                    -- what it was compared against
+);

@@ -1,8 +1,10 @@
 //! SQLite persistence for Harpia. One file per bench database; WAL mode;
 //! every write inside a transaction so a killed run never corrupts a round.
 
+pub mod meta;
+
 use anyhow::{Context, Result};
-use harpia_core::metrics::{ModelCall, Outcome, Telemetry, ToolCall};
+use harpia_core::metrics::{Fault, ModelCall, Outcome, ProxyUsage, Telemetry, TelemetrySource, ToolCall};
 use harpia_core::scoring::{self, OracleVerdict};
 use rusqlite::{params, Connection};
 use std::collections::HashSet;
@@ -42,8 +44,39 @@ const V2_COLUMNS: &[(&str, &str)] = &[
     ("oracle_result", "duration_ms INTEGER"),
 ];
 
+/// Columns added at v3, for measuring the benchmark itself. Same ALTER-or-noop
+/// discipline as v2.
+const V3_COLUMNS: &[(&str, &str)] = &[
+    // What the task *was*, not what the file says today. Cross-round pairing
+    // reads the trial's copy: a task edited between rounds must not be
+    // silently compared against its earlier self.
+    ("task", "content_sha TEXT"),
+    ("task", "family TEXT"),
+    ("trial", "task_content_sha TEXT"),
+    // Whose fault a bad trial was, and which accounting path measured it.
+    ("trial", "fault TEXT"),
+    ("trial", "telemetry_source TEXT"),
+    ("trial", "proxy_input_tokens INTEGER"),
+    ("trial", "proxy_output_tokens INTEGER"),
+    ("trial", "proxy_cache_read_tokens INTEGER"),
+    ("trial", "proxy_cache_write_tokens INTEGER"),
+    ("trial", "proxy_requests INTEGER"),
+    // Which wording the harness was given, and which process ran the trial —
+    // a round assembled over three sessions can be checked for batch effects.
+    ("trial", "prompt_variant INTEGER"),
+    ("trial", "session_id TEXT"),
+    // The knobs a sensitivity round turns. Recorded on the round so two
+    // rounds that differ only in budget are comparable *as* that experiment.
+    ("round", "order_seed INTEGER"),
+    ("round", "budget_scale REAL"),
+    ("round", "prompt_variant INTEGER"),
+    ("round", "oracles_visible INTEGER"),
+    ("round", "toolchain TEXT"),
+    ("round", "notes TEXT"),
+];
+
 fn migrate(conn: &Connection) -> Result<()> {
-    for (table, column) in V2_COLUMNS {
+    for (table, column) in V2_COLUMNS.iter().chain(V3_COLUMNS) {
         let sql = format!("ALTER TABLE {table} ADD COLUMN {column}");
         match conn.execute(&sql, []) {
             Ok(_) => {}
@@ -84,6 +117,37 @@ pub struct TrialRecord<'a> {
     pub steps: Option<u64>,
     /// Why the harness stopped, in its own words.
     pub stop_reason: Option<&'a str>,
+    /// Everything needed to audit the trial after the fact.
+    pub provenance: TrialProvenance<'a>,
+}
+
+/// The audit trail of one trial: what it was run against, who is answerable
+/// for how it ended, and where its usage numbers came from.
+#[derive(Debug, Clone)]
+pub struct TrialProvenance<'a> {
+    pub fault: Fault,
+    pub telemetry_source: TelemetrySource,
+    /// Wire-observed usage, when the proxy was in the path.
+    pub proxy: Option<ProxyUsage>,
+    /// 0 = the canonical prompt.
+    pub prompt_variant: u32,
+    /// Content hash of the task *as this trial saw it*.
+    pub task_content_sha: Option<&'a str>,
+    /// Which `harpia run` process produced this trial.
+    pub session_id: Option<&'a str>,
+}
+
+impl Default for TrialProvenance<'_> {
+    fn default() -> Self {
+        Self {
+            fault: Fault::None,
+            telemetry_source: TelemetrySource::Missing,
+            proxy: None,
+            prompt_variant: 0,
+            task_content_sha: None,
+            session_id: None,
+        }
+    }
 }
 
 /// A trial as the report side reads it: telemetry plus derived scores.
@@ -96,6 +160,10 @@ pub struct TrialRow {
     pub telemetry: Telemetry,
     pub capability: f64,
     pub security: f64,
+    pub fault: Fault,
+    /// What the task hashed to when this trial ran. `None` on rows written
+    /// before v3 — cross-round pairing treats that as "unknown", not "same".
+    pub task_content_sha: Option<String>,
 }
 
 /// Everything known about a round when it starts.
@@ -119,6 +187,22 @@ pub struct RoundStart<'a> {
     pub corpus_size: Option<u32>,
     pub harpia_version: Option<&'a str>,
     pub started_epoch: Option<i64>,
+    /// Seed that fixed the task order. Two rounds sharing it ran the corpus
+    /// in the same sequence, which is what makes an order effect testable.
+    pub order_seed: Option<i64>,
+    /// Multiplier applied to every task's wall-clock and cost ceiling. 1.0 is
+    /// the standard budget; a 2.0 round exists to measure how much of a score
+    /// was the ceiling rather than the harness.
+    pub budget_scale: Option<f64>,
+    /// Which prompt wording the round used. 0 = canonical.
+    pub prompt_variant: Option<u32>,
+    /// Calibration rounds where the hidden tests were placed in the workspace
+    /// before the harness ran. Never a scoring round — the gap between it and
+    /// its hidden twin is the measurement.
+    pub oracles_visible: Option<bool>,
+    /// JSON of probed tool versions at round start.
+    pub toolchain: Option<&'a str>,
+    pub notes: Option<&'a str>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -179,10 +263,30 @@ impl Store {
     }
 
     pub fn upsert_task(&self, id: &str, stack: &str, tier: &str, title: &str, spec: &str) -> Result<()> {
+        self.upsert_task_full(id, stack, tier, title, spec, None, None)
+    }
+
+    /// `content_sha` covers everything a trial can see or be graded by. It is
+    /// the key the comparability guard reads: two rounds may be paired on a
+    /// task only if both ran the same bytes.
+    #[allow(clippy::too_many_arguments)]
+    pub fn upsert_task_full(
+        &self,
+        id: &str,
+        stack: &str,
+        tier: &str,
+        title: &str,
+        spec: &str,
+        content_sha: Option<&str>,
+        family: Option<&str>,
+    ) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO task (id, stack, tier, title, spec) VALUES (?1, ?2, ?3, ?4, ?5)
-             ON CONFLICT(id) DO UPDATE SET stack = ?2, tier = ?3, title = ?4, spec = ?5",
-            params![id, stack, tier, title, spec],
+            "INSERT INTO task (id, stack, tier, title, spec, content_sha, family)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+             ON CONFLICT(id) DO UPDATE SET stack = ?2, tier = ?3, title = ?4, spec = ?5,
+                content_sha = COALESCE(?6, task.content_sha),
+                family = COALESCE(?7, task.family)",
+            params![id, stack, tier, title, spec, content_sha, family],
         )?;
         Ok(())
     }
@@ -213,12 +317,14 @@ impl Store {
         self.conn.execute(
             "INSERT INTO round (label, harness_id, model, effort, tasks_sha, started_at,
                 link_kind, model_wire, params, thinking, jobs, corpus_size,
-                harpia_version, started_epoch)
-             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14)",
+                harpia_version, started_epoch, order_seed, budget_scale,
+                prompt_variant, oracles_visible, toolchain, notes)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20)",
             params![
                 r.label, r.harness_id, r.model, r.effort, r.tasks_sha, r.started_at,
                 r.link_kind, r.model_wire, r.params, r.thinking, r.jobs, r.corpus_size,
-                r.harpia_version, r.started_epoch
+                r.harpia_version, r.started_epoch, r.order_seed, r.budget_scale,
+                r.prompt_variant, r.oracles_visible, r.toolchain, r.notes
             ],
         )?;
         Ok(self.conn.last_insert_rowid())
@@ -254,12 +360,18 @@ impl Store {
     pub fn record_trial(&mut self, rec: &TrialRecord) -> Result<i64> {
         let tx = self.conn.transaction()?;
         let t = rec.telemetry;
+        let p = &rec.provenance;
+        let proxy = p.proxy.unwrap_or_default();
         tx.execute(
             "INSERT INTO trial (round_id, task_id, attempt, outcome, wall_ms,
                 input_tokens, output_tokens, cache_read_tokens, cache_write_tokens,
                 requests, turns, tool_calls, tool_errors, cost_usd, diff_stat,
-                started_epoch, finished_epoch, rung, steps, stop_reason)
-             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20)",
+                started_epoch, finished_epoch, rung, steps, stop_reason,
+                fault, telemetry_source, task_content_sha, prompt_variant, session_id,
+                proxy_input_tokens, proxy_output_tokens, proxy_cache_read_tokens,
+                proxy_cache_write_tokens, proxy_requests)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20,
+                     ?21,?22,?23,?24,?25,?26,?27,?28,?29,?30)",
             params![
                 rec.round_id,
                 rec.task_id,
@@ -281,6 +393,16 @@ impl Store {
                 rec.rung,
                 rec.steps,
                 rec.stop_reason,
+                p.fault.as_str(),
+                p.telemetry_source.as_str(),
+                p.task_content_sha,
+                p.prompt_variant,
+                p.session_id,
+                proxy.input_tokens,
+                proxy.output_tokens,
+                proxy.cache_read_tokens,
+                proxy.cache_write_tokens,
+                proxy.requests,
             ],
         )?;
         let trial_id = tx.last_insert_rowid();
@@ -364,12 +486,13 @@ impl Store {
         let mut stmt = self.conn.prepare(
             "SELECT id, task_id, attempt, outcome, wall_ms, input_tokens, output_tokens,
                     cache_read_tokens, cache_write_tokens, requests, turns,
-                    tool_calls, tool_errors, cost_usd
+                    tool_calls, tool_errors, cost_usd, fault, task_content_sha
              FROM trial WHERE round_id = ?1 ORDER BY task_id, attempt",
         )?;
         let mut out: Vec<TrialRow> = stmt
             .query_map(params![round_id], |r| {
                 let outcome_s: String = r.get(3)?;
+                let fault_s: Option<String> = r.get(14)?;
                 Ok(TrialRow {
                     id: r.get(0)?,
                     task_id: r.get(1)?,
@@ -389,6 +512,11 @@ impl Store {
                     },
                     capability: 0.0,
                     security: 0.0,
+                    fault: fault_s
+                        .as_deref()
+                        .and_then(Fault::parse)
+                        .unwrap_or(Fault::None),
+                    task_content_sha: r.get(15)?,
                 })
             })?
             .collect::<rusqlite::Result<_>>()?;
@@ -500,6 +628,13 @@ mod tests {
             rung: Some("native"),
             steps: Some(3),
             stop_reason: Some("the backlog is exhausted"),
+            provenance: TrialProvenance {
+                fault: Fault::None,
+                telemetry_source: TelemetrySource::FirstParty,
+                task_content_sha: Some("task-sha-1"),
+                session_id: Some("sess-test"),
+                ..Default::default()
+            },
         })
         .unwrap();
         (s, round)
@@ -550,6 +685,7 @@ mod tests {
             rung: None,
             steps: None,
             stop_reason: None,
+            provenance: TrialProvenance::default(),
         });
         assert!(dup.is_err(), "UNIQUE(round_id, task_id, attempt) must hold");
     }

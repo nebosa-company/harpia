@@ -2,6 +2,8 @@
 //! comparisons. The scorecard never collapses to one number — the point of
 //! a harness bench is the trade-offs a single score hides.
 
+pub mod meta;
+
 use anyhow::Result;
 use harpia_core::metrics::Outcome;
 use harpia_core::stats;
@@ -10,7 +12,7 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 
 const CI_ITERS: u32 = 4000;
-const CI_SEED: u64 = 0x4841525049_41; // "HARPIA"
+const CI_SEED: u64 = 0x4841_5250_4941; // "HARPIA"
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Scorecard {
@@ -138,16 +140,58 @@ pub fn scorecard(store: &Store, round_id: i64) -> Result<Scorecard> {
 pub struct Comparison {
     pub a: Scorecard,
     pub b: Scorecard,
-    /// Tasks present with attempt 1 in both rounds.
+    /// Tasks present with attempt 1 in both rounds, and not excluded by the
+    /// comparability guard.
     pub paired_tasks: usize,
+    /// Paired tasks where both rounds recorded the same task content hash.
+    pub paired_verified: usize,
+    /// Paired tasks where at least one round predates content hashing, so
+    /// sameness cannot be proven. Included, and said out loud.
+    pub paired_unverified: usize,
+    /// Tasks sharing an id whose content differed between the rounds. These
+    /// are *not* the same task and are excluded from every statistic below.
+    pub dropped_content_mismatch: usize,
+    /// Tasks only one of the two rounds attempted.
+    pub unpaired_a_only: usize,
+    pub unpaired_b_only: usize,
     pub a_only_solved: u32,
     pub b_only_solved: u32,
     pub mcnemar_p: f64,
     /// On per-task capability differences (b - a).
     pub wilcoxon_p: Option<f64>,
     pub capability_diff: f64,
+    /// Bootstrap CI of the paired mean difference.
+    pub capability_diff_ci: Option<(f64, f64)>,
+    /// Spread of the paired differences — what powers the two numbers below.
+    pub sd_diff: f64,
+    /// Smallest difference this pairing could have detected at 80% power.
+    /// A result under it is not evidence of similarity, only of a small n.
+    pub mde: Option<f64>,
+    /// Power actually achieved against the observed difference.
+    pub power: Option<f64>,
 }
 
+impl Comparison {
+    /// Every paired task was proven to be byte-identical across the rounds.
+    pub fn corpus_verified(&self) -> bool {
+        self.dropped_content_mismatch == 0 && self.paired_unverified == 0
+    }
+
+    /// The observed difference is smaller than what this design can resolve.
+    pub fn underpowered(&self) -> bool {
+        self.mde.is_some_and(|m| self.capability_diff.abs() < m)
+    }
+}
+
+/// Paired comparison of two rounds, guarded on task content.
+///
+/// Pairing by task id alone is the mistake this function exists to avoid: an
+/// id is a name, and a name can be reused. Between two rounds a task's
+/// workspace or its hidden tests may have been edited, and comparing the two
+/// halves of that edit is not a paired design — it is two different tasks
+/// wearing one label. Rounds recorded before content hashing cannot prove
+/// sameness either way; those pairings are kept, counted separately, and
+/// printed as unverified rather than passed off as sound.
 pub fn compare(store: &Store, round_a: i64, round_b: i64) -> Result<Comparison> {
     let a = scorecard(store, round_a)?;
     let b = scorecard(store, round_b)?;
@@ -160,27 +204,51 @@ pub fn compare(store: &Store, round_a: i64, round_b: i64) -> Result<Comparison> 
         .collect();
     let mut diffs = Vec::new();
     let (mut a_only, mut b_only) = (0u32, 0u32);
-    let mut paired = 0usize;
+    let (mut verified, mut unverified, mut mismatched) = (0usize, 0usize, 0usize);
+    let mut b_seen = 0usize;
+    let mut b_unpaired = 0usize;
     for rb in rows_b.iter().filter(|r| r.attempt == 1) {
-        let Some(ra) = map_a.get(rb.task_id.as_str()) else { continue };
-        paired += 1;
+        b_seen += 1;
+        let Some(ra) = map_a.get(rb.task_id.as_str()) else {
+            b_unpaired += 1;
+            continue;
+        };
+        match (&ra.task_content_sha, &rb.task_content_sha) {
+            (Some(x), Some(y)) if x != y => {
+                mismatched += 1;
+                continue;
+            }
+            (Some(_), Some(_)) => verified += 1,
+            _ => unverified += 1,
+        }
         diffs.push(rb.capability - ra.capability);
-        let (sa, sb) = (ra.capability >= 1.0, rb.capability >= 1.0);
-        match (sa, sb) {
+        match (ra.capability >= 1.0, rb.capability >= 1.0) {
             (true, false) => a_only += 1,
             (false, true) => b_only += 1,
             _ => {}
         }
     }
+    let paired = verified + unverified;
+    let sd_diff = stats::sample_sd(&diffs);
+    let capability_diff = stats::mean(&diffs);
     Ok(Comparison {
         a,
         b,
         paired_tasks: paired,
+        paired_verified: verified,
+        paired_unverified: unverified,
+        dropped_content_mismatch: mismatched,
+        unpaired_a_only: map_a.len().saturating_sub(b_seen - b_unpaired),
+        unpaired_b_only: b_unpaired,
         a_only_solved: a_only,
         b_only_solved: b_only,
         mcnemar_p: stats::mcnemar_p(a_only, b_only),
         wilcoxon_p: stats::wilcoxon_p(&diffs),
-        capability_diff: stats::mean(&diffs),
+        capability_diff,
+        capability_diff_ci: stats::bootstrap_ci_mean(&diffs, CI_ITERS, 0.05, CI_SEED),
+        sd_diff,
+        mde: stats::mde_paired(sd_diff, diffs.len(), 0.05, 0.8),
+        power: stats::power_paired(capability_diff, sd_diff, diffs.len(), 0.05),
     })
 }
 
@@ -217,14 +285,43 @@ pub fn render_compare_text(c: &Comparison) -> String {
     o.push_str(&format!("A: {}\n", render_text(&c.a).replace('\n', "\n   ")));
     o.push_str(&format!("B: {}\n", render_text(&c.b).replace('\n', "\n   ")));
     o.push_str(&format!(
-        "paired     {} tasks  |  solved only by A: {}  only by B: {}  (McNemar p = {:.4})\n",
-        c.paired_tasks, c.a_only_solved, c.b_only_solved, c.mcnemar_p
+        "paired     {} tasks ({} content-verified, {} unverified)  |  dropped {} on content mismatch\n",
+        c.paired_tasks, c.paired_verified, c.paired_unverified, c.dropped_content_mismatch
+    ));
+    if !c.corpus_verified() {
+        o.push_str(
+            "           NOT a proven like-for-like corpus; see the unverified/dropped counts\n",
+        );
+    }
+    if c.unpaired_a_only > 0 || c.unpaired_b_only > 0 {
+        o.push_str(&format!(
+            "unpaired   only in A: {}   only in B: {}\n",
+            c.unpaired_a_only, c.unpaired_b_only
+        ));
+    }
+    o.push_str(&format!(
+        "discordant solved only by A: {}  only by B: {}  (McNemar p = {:.4})\n",
+        c.a_only_solved, c.b_only_solved, c.mcnemar_p
     ));
     o.push_str(&format!(
-        "capability B - A = {:+.3}  (Wilcoxon p = {})\n",
+        "capability B - A = {:+.3}{}  (Wilcoxon p = {})\n",
         c.capability_diff,
+        c.capability_diff_ci
+            .map(|(lo, hi)| format!("  [{lo:+.3}, {hi:+.3}]"))
+            .unwrap_or_default(),
         c.wilcoxon_p.map(|p| format!("{p:.4}")).unwrap_or_else(|| "n/a".into())
     ));
+    o.push_str(&format!(
+        "power      sd(diff) {:.3}   MDE@80% {}   achieved power {}\n",
+        c.sd_diff,
+        c.mde.map(|m| format!("{m:.3}")).unwrap_or_else(|| "n/a".into()),
+        c.power.map(|p| format!("{:.0}%", p * 100.0)).unwrap_or_else(|| "n/a".into())
+    ));
+    if c.underpowered() {
+        o.push_str(
+            "           the observed gap is below the MDE: this pairing cannot resolve it\n",
+        );
+    }
     o
 }
 
@@ -264,6 +361,10 @@ mod tests {
                 rung: None,
                 steps: None,
                 stop_reason: None,
+                provenance: harpia_store::TrialProvenance {
+                    task_content_sha: Some("sha-v1"),
+                    ..Default::default()
+                },
             })
             .unwrap();
     }

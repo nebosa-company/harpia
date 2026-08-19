@@ -25,6 +25,15 @@ pub struct Manifest {
     /// Unset means stdout.
     #[serde(default)]
     pub telemetry_path: Option<String>,
+    /// A second, independent accounting path for the same trial, relative to
+    /// the workspace. When both it and `telemetry_path` yield usage, the two
+    /// counts can be compared — and two independent counts that agree are the
+    /// only evidence either is right.
+    #[serde(default)]
+    pub cross_check_path: Option<String>,
+    /// Parser for `cross_check_path`. Defaults to the proxy's own JSONL.
+    #[serde(default)]
+    pub cross_check_telemetry: Option<TelemetryKind>,
     /// Extra setup the runner performs before launch.
     #[serde(default)]
     pub lifecycle: Lifecycle,
@@ -141,6 +150,30 @@ telemetry = "generic-jsonl"
             ..Default::default()
         });
         assert_eq!(argv, ["tool", "--root", "C:/sb/t1", "--brief", "do the thing"]);
+    }
+
+    #[test]
+    fn cross_check_path_is_optional_and_typed() {
+        let m: Manifest = toml::from_str(
+            r#"
+id = "demo"
+command = ["tool"]
+telemetry = "perpetum-journal"
+telemetry_path = ".harness/journal.jsonl"
+cross_check_path = "../usage.jsonl"
+cross_check_telemetry = "proxy-jsonl"
+"#,
+        )
+        .unwrap();
+        assert_eq!(m.cross_check_path.as_deref(), Some("../usage.jsonl"));
+        assert_eq!(m.cross_check_telemetry, Some(TelemetryKind::ProxyJsonl));
+
+        let bare: Manifest =
+            toml::from_str("id = \"d\"
+command = [\"t\"]
+telemetry = \"generic-jsonl\"
+").unwrap();
+        assert!(bare.cross_check_path.is_none());
     }
 
     #[test]

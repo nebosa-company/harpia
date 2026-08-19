@@ -100,3 +100,143 @@ pub struct ToolCall {
     pub refusal: Option<String>,
     pub step: Option<String>,
 }
+
+/// Who is answerable for a trial that did not finish clean.
+///
+/// `Outcome` says *what* happened; this says *whose* it was. Without the
+/// split, a provider 503 and a harness that cannot write a file both land as
+/// `Crashed` and both read as incapability — so a bad afternoon on the
+/// network becomes a permanent line on a harness's scorecard.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum Fault {
+    /// Trial ran as designed (whether or not the harness solved anything).
+    None,
+    /// The harness misbehaved: non-zero exit, unparseable output, its own bug.
+    Harness,
+    /// Harpia, the sandbox, the machine, or the provider let the trial down.
+    Infra,
+}
+
+impl Fault {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Fault::None => "none",
+            Fault::Harness => "harness",
+            Fault::Infra => "infra",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        Some(match s {
+            "none" => Fault::None,
+            "harness" => Fault::Harness,
+            "infra" => Fault::Infra,
+            _ => return None,
+        })
+    }
+}
+
+/// Which accounting path produced a trial's usage numbers.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum TelemetrySource {
+    /// The harness's own journal / stream / log.
+    FirstParty,
+    /// Harpia's usage proxy, counting on the wire.
+    Proxy,
+    /// Both ran — the only configuration that can be cross-checked.
+    Both,
+    /// Neither yielded usage. Recorded, never rounded down to zero.
+    Missing,
+}
+
+impl TelemetrySource {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            TelemetrySource::FirstParty => "first-party",
+            TelemetrySource::Proxy => "proxy",
+            TelemetrySource::Both => "both",
+            TelemetrySource::Missing => "missing",
+        }
+    }
+
+    pub fn parse(s: &str) -> Option<Self> {
+        Some(match s {
+            "first-party" => TelemetrySource::FirstParty,
+            "proxy" => TelemetrySource::Proxy,
+            "both" => TelemetrySource::Both,
+            "missing" => TelemetrySource::Missing,
+            _ => return None,
+        })
+    }
+}
+
+/// Wire-observed usage, kept beside the harness's own numbers rather than
+/// replacing them. Two independent counts that agree are the only evidence
+/// either is right.
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+pub struct ProxyUsage {
+    pub input_tokens: u64,
+    pub output_tokens: u64,
+    pub cache_read_tokens: u64,
+    pub cache_write_tokens: u64,
+    pub requests: u64,
+}
+
+impl ProxyUsage {
+    pub fn total_tokens(&self) -> u64 {
+        self.input_tokens + self.output_tokens + self.cache_read_tokens + self.cache_write_tokens
+    }
+
+    /// Relative disagreement with the harness's own totals, |proxy - own| /
+    /// max(proxy, own). `None` when there is nothing to compare.
+    pub fn disagreement(&self, own: &Telemetry) -> Option<f64> {
+        let mine = self.total_tokens() as f64;
+        let theirs = (own.input_tokens
+            + own.output_tokens
+            + own.cache_read_tokens
+            + own.cache_write_tokens) as f64;
+        let scale = mine.max(theirs);
+        (scale > 0.0).then(|| (mine - theirs).abs() / scale)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn outcome_and_fault_round_trip() {
+        for o in [
+            Outcome::Finished,
+            Outcome::Timeout,
+            Outcome::CostCeiling,
+            Outcome::Crashed,
+            Outcome::Malformed,
+        ] {
+            assert_eq!(Outcome::parse(o.as_str()), Some(o));
+        }
+        for f in [Fault::None, Fault::Harness, Fault::Infra] {
+            assert_eq!(Fault::parse(f.as_str()), Some(f));
+        }
+        for t in [
+            TelemetrySource::FirstParty,
+            TelemetrySource::Proxy,
+            TelemetrySource::Both,
+            TelemetrySource::Missing,
+        ] {
+            assert_eq!(TelemetrySource::parse(t.as_str()), Some(t));
+        }
+        assert_eq!(Fault::parse("nonsense"), None);
+    }
+
+    #[test]
+    fn disagreement_is_relative_and_absent_when_silent() {
+        let own = Telemetry { input_tokens: 900, output_tokens: 100, ..Default::default() };
+        let proxy = ProxyUsage { input_tokens: 1000, output_tokens: 100, ..Default::default() };
+        let d = proxy.disagreement(&own).unwrap();
+        assert!((d - 100.0 / 1100.0).abs() < 1e-12);
+        assert!(ProxyUsage::default().disagreement(&Telemetry::default()).is_none());
+    }
+}
