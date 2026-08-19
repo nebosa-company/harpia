@@ -10,6 +10,14 @@ pub enum Stack {
     Flutter,
     Node,
     Python,
+    Typescript,
+    Javascript,
+    Postgres,
+    Docs,
+    Bash,
+    Powershell,
+    HtmlCss,
+    R,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
