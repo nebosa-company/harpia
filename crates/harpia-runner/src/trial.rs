@@ -86,9 +86,28 @@ pub fn run_trial(task: &TaskDir, cfg: &TrialConfig) -> Result<TrialResult> {
     let _ = std::fs::write(sandbox.join("harness.stdout.txt"), &harness.stdout);
     let _ = std::fs::write(sandbox.join("harness.stderr.txt"), &harness.stderr);
 
-    // Telemetry: stdout, or a file the harness left in the workspace.
+    // Telemetry: stdout, or a file the harness left behind. File reads are
+    // retried briefly: a WSL-side writer's last lines can lag behind the
+    // process exit on the 9P mount, and an instant read sees an empty file.
     let raw = match &cfg.manifest.telemetry_path {
-        Some(rel) => std::fs::read_to_string(ws.join(rel)).unwrap_or_default(),
+        Some(rel) => {
+            let path = ws.join(rel);
+            let mut raw = String::new();
+            for _ in 0..20 {
+                raw = std::fs::read_to_string(&path).unwrap_or_default();
+                if !raw.is_empty() {
+                    break;
+                }
+                std::thread::sleep(Duration::from_millis(100));
+            }
+            if raw.is_empty() {
+                let _ = std::fs::write(
+                    sandbox.join("telemetry-note.txt"),
+                    format!("telemetry file empty or unreadable after retries: {}", path.display()),
+                );
+            }
+            raw
+        }
         None => harness.stdout.clone(),
     };
     let parsed = parsers::parse(cfg.manifest.telemetry, &raw);

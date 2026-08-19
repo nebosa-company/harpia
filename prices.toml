@@ -1,0 +1,15 @@
+# USD per million tokens; loaded into the price table at round start.
+# Used to shadow-price trials whose harness reports no cost of its own
+# (wire-proxied harnesses like dsh, subscription links like claude-cli).
+
+[deepseek-v4-flash]
+input_per_mtok = 0.14
+output_per_mtok = 0.28
+cache_read_per_mtok = 0.0028
+cache_write_per_mtok = 0.0
+
+[claude-opus-5]
+input_per_mtok = 15.0
+output_per_mtok = 75.0
+cache_read_per_mtok = 1.5
+cache_write_per_mtok = 18.75

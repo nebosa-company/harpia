@@ -79,6 +79,9 @@ pub fn scorecard(store: &Store, round_id: i64) -> Result<Scorecard> {
     let mut outcomes: BTreeMap<String, u32> = BTreeMap::new();
     let mut t = harpia_core::metrics::Telemetry::default();
     let mut cost = 0.0;
+    // Shadow pricing: a harness that reports no cost (wire-proxied, or on a
+    // subscription) is still priced from the table so rounds stay comparable.
+    let table_price = store.price(&model)?;
     for r in &rows {
         *outcomes.entry(r.outcome.as_str().to_string()).or_default() += 1;
         t.input_tokens += r.telemetry.input_tokens;
@@ -89,7 +92,12 @@ pub fn scorecard(store: &Store, round_id: i64) -> Result<Scorecard> {
         t.tool_calls += r.telemetry.tool_calls;
         t.tool_errors += r.telemetry.tool_errors;
         t.wall_ms += r.telemetry.wall_ms;
-        cost += r.telemetry.cost_usd.unwrap_or(0.0);
+        cost += match (r.telemetry.cost_usd, table_price) {
+            (Some(c), _) if c > 0.0 => c,
+            (_, Some(p)) => p.cost(&r.telemetry),
+            (Some(c), None) => c,
+            (None, None) => 0.0,
+        };
     }
     let wall_hours = t.wall_ms as f64 / 3_600_000.0;
 

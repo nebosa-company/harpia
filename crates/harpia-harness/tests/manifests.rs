@@ -16,7 +16,7 @@ fn shipped_manifests_load() {
 
     let dsh = &all["dsh"];
     assert_eq!(dsh.telemetry, TelemetryKind::ProxyJsonl);
-    assert_eq!(dsh.base_url_env.as_deref(), Some("DEEPSEEK_BASE_URL"));
+    assert_eq!(dsh.telemetry_path.as_deref(), Some("../dsh-usage.jsonl"));
     assert!(dsh.upstream.is_some());
 
     let cc = &all["claude-code"];

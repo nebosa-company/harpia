@@ -4,9 +4,43 @@ use harpia_harness::Manifest;
 use harpia_runner::round::{run_round, RoundConfig};
 use harpia_runner::tasks::load_tasks;
 use harpia_runner::validate::{validate_task, STARTER_FLOOR};
-use harpia_store::Store;
+use harpia_store::{Price, Store};
+use serde::Deserialize;
 use std::path::PathBuf;
 use std::time::Duration;
+
+#[derive(Deserialize)]
+struct PriceEntry {
+    input_per_mtok: f64,
+    output_per_mtok: f64,
+    #[serde(default)]
+    cache_read_per_mtok: f64,
+    #[serde(default)]
+    cache_write_per_mtok: f64,
+}
+
+/// Seed the price table from `prices.toml` beside the harnesses dir.
+fn seed_prices(store: &Store, harnesses: &std::path::Path) -> Result<()> {
+    let path = harnesses
+        .parent()
+        .unwrap_or_else(|| std::path::Path::new("."))
+        .join("prices.toml");
+    let Ok(raw) = std::fs::read_to_string(&path) else { return Ok(()) };
+    let table: std::collections::BTreeMap<String, PriceEntry> =
+        toml::from_str(&raw).with_context(|| format!("parsing {}", path.display()))?;
+    for (model, p) in table {
+        store.set_price(
+            &model,
+            Price {
+                input_per_mtok: p.input_per_mtok,
+                output_per_mtok: p.output_per_mtok,
+                cache_read_per_mtok: p.cache_read_per_mtok,
+                cache_write_per_mtok: p.cache_write_per_mtok,
+            },
+        )?;
+    }
+    Ok(())
+}
 
 #[derive(Parser)]
 #[command(name = "harpia", version, about = "Agentic harness benchmark")]
@@ -109,6 +143,7 @@ fn main() -> Result<()> {
             }
             let tasks_sha = git_sha(&tasks);
             let mut store = Store::open(&db)?;
+            seed_prices(&store, &harnesses)?;
             eprintln!(
                 "round `{label}`: {} × {model} over {} tasks × {attempts} attempt(s), {jobs} job(s)",
                 manifest.id,
