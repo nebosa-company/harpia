@@ -58,9 +58,25 @@ enum Cmd {
         filter: Option<String>,
     },
     /// Render a round's scorecard.
-    Report,
+    Report {
+        #[arg(long)]
+        label: String,
+        #[arg(long, default_value = "harpia.db")]
+        db: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
     /// Paired statistical comparison of two rounds.
-    Compare,
+    Compare {
+        #[arg(long)]
+        a: String,
+        #[arg(long)]
+        b: String,
+        #[arg(long, default_value = "harpia.db")]
+        db: PathBuf,
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 fn main() -> Result<()> {
@@ -145,9 +161,30 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
-        Cmd::Report | Cmd::Compare => {
-            eprintln!("report/compare land with harpia-report");
-            std::process::exit(2);
+        Cmd::Report { label, db, json } => {
+            let store = Store::open(&db)?;
+            let id = store
+                .round_id(&label)?
+                .with_context(|| format!("no round labelled `{label}`"))?;
+            let card = harpia_report::scorecard(&store, id)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&card)?);
+            } else {
+                print!("{}", harpia_report::render_text(&card));
+            }
+            Ok(())
+        }
+        Cmd::Compare { a, b, db, json } => {
+            let store = Store::open(&db)?;
+            let ia = store.round_id(&a)?.with_context(|| format!("no round `{a}`"))?;
+            let ib = store.round_id(&b)?.with_context(|| format!("no round `{b}`"))?;
+            let cmp = harpia_report::compare(&store, ia, ib)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&cmp)?);
+            } else {
+                print!("{}", harpia_report::render_compare_text(&cmp));
+            }
+            Ok(())
         }
     }
 }

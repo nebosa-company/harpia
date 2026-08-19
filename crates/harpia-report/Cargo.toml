@@ -7,4 +7,5 @@ edition.workspace = true
 harpia-core.workspace = true
 harpia-store.workspace = true
 anyhow.workspace = true
+serde.workspace = true
 serde_json.workspace = true

@@ -277,6 +277,17 @@ impl Store {
         Ok(out)
     }
 
+    /// (passed, total) oracle counts across a round.
+    pub fn oracle_counts(&self, round_id: i64) -> Result<(u64, u64)> {
+        Ok(self.conn.query_row(
+            "SELECT COALESCE(SUM(o.passed), 0), COUNT(*)
+             FROM oracle_result o JOIN trial t ON t.id = o.trial_id
+             WHERE t.round_id = ?1",
+            params![round_id],
+            |r| Ok((r.get::<_, u64>(0)?, r.get::<_, u64>(1)?)),
+        )?)
+    }
+
     /// Round row for report headers.
     pub fn round_meta(&self, round_id: i64) -> Result<(String, String, String, Option<String>, String)> {
         self.conn
