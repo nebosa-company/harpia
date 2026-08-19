@@ -3,8 +3,10 @@
 # writes .harness/links.md, and mints {req_id} before this command runs.
 id = "perpetum"
 lifecycle = "perpetum"
+# Override with HARPIA_PERP_BIN to point at another checkout or a release
+# build; the default is a sibling clone of perpetum.io on this machine.
 command = [
-    "D:/repos/perpetum.io/perp.exe",
+    "${HARPIA_PERP_BIN:-D:/repos/perpetum.io/perp.exe}",
     "run",
     "--root", "{workspace}",
     "--requirement", "{req_id}",

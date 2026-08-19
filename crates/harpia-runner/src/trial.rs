@@ -364,7 +364,7 @@ fn spawn_harness(manifest: &Manifest, argv: &[String], cwd: &Path, timeout: Dura
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
-    for (k, v) in &manifest.env {
+    for (k, v) in manifest.env_pairs() {
         cmd.env(k, v);
     }
     let mut child = cmd.spawn().with_context(|| format!("spawning harness {program}"))?;

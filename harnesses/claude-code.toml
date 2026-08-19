@@ -3,9 +3,10 @@
 # Runs headless in the sandbox; stream-json carries usage and cost.
 id = "claude-code"
 # The bare `claude` on PATH is an npm .cmd shim CreateProcess cannot spawn;
-# the shim's own target is this native exe.
+# the shim's own target is this native exe. Override with HARPIA_CLAUDE_BIN
+# when it lives somewhere else (a non-global install, or a non-Windows box).
 command = [
-    "C:/Users/gaddl/AppData/Roaming/npm/node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+    "${HARPIA_CLAUDE_BIN:-${APPDATA}/npm/node_modules/@anthropic-ai/claude-code/bin/claude.exe}",
     "-p", "{prompt}",
     "--model", "{model}",
     "--effort", "{effort}",

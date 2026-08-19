@@ -115,10 +115,20 @@ impl Manifest {
     pub fn argv(&self, vars: &TrialVars) -> Vec<String> {
         self.command.iter().map(|a| substitute(a, vars)).collect()
     }
+
+    /// Environment for the child, with `${VAR}` expansion applied to the
+    /// values so a manifest can point at a machine-specific location without
+    /// hardcoding one.
+    pub fn env_pairs(&self) -> Vec<(String, String)> {
+        self.env
+            .iter()
+            .map(|(k, v)| (k.clone(), expand_env(v)))
+            .collect()
+    }
 }
 
 fn substitute(template: &str, v: &TrialVars) -> String {
-    template
+    let filled = template
         .replace("{workspace}", &v.workspace)
         .replace("{prompt_file}", &v.prompt_file)
         .replace("{prompt}", &v.prompt)
@@ -126,7 +136,63 @@ fn substitute(template: &str, v: &TrialVars) -> String {
         .replace("{effort}", &v.effort)
         .replace("{session_id}", &v.session_id)
         .replace("{req_id}", &v.req_id)
-        .replace("{timeout_secs}", &v.timeout_secs)
+        .replace("{timeout_secs}", &v.timeout_secs);
+    expand_env(&filled)
+}
+
+/// Expand `${VAR}` and `${VAR:-default}` from the process environment.
+///
+/// Manifests have to name real binaries, and a real binary lives somewhere
+/// different on every machine. Without this, the choice is between a manifest
+/// that only works here and one that works nowhere: the shipped manifests
+/// carry a working default *and* an override, so a checkout runs unmodified
+/// and a different machine needs one environment variable rather than a
+/// patch.
+///
+/// Braces are matched by depth, so a default may itself contain a variable:
+/// `${HARPIA_CLAUDE_BIN:-${APPDATA}/npm/claude.exe}`. An unset variable with
+/// no default expands to nothing, which fails loudly at spawn — better than
+/// silently running some other binary that happens to be on PATH.
+pub fn expand_env(input: &str) -> String {
+    let bytes = input.as_bytes();
+    let mut out = String::with_capacity(input.len());
+    let mut i = 0usize;
+    while i < bytes.len() {
+        if bytes[i] == b'$' && i + 1 < bytes.len() && bytes[i + 1] == b'{' {
+            let start = i + 2;
+            let mut depth = 1usize;
+            let mut j = start;
+            while j < bytes.len() && depth > 0 {
+                match bytes[j] {
+                    b'{' => depth += 1,
+                    b'}' => depth -= 1,
+                    _ => {}
+                }
+                j += 1;
+            }
+            if depth != 0 {
+                // Unterminated: leave the text exactly as written rather than
+                // guessing where it was meant to end.
+                out.push_str(&input[i..]);
+                return out;
+            }
+            let inner = &input[start..j - 1];
+            let (name, default) = match inner.find(":-") {
+                Some(k) => (&inner[..k], Some(&inner[k + 2..])),
+                None => (inner, None),
+            };
+            let value = std::env::var(name.trim())
+                .ok()
+                .filter(|v| !v.is_empty())
+                .unwrap_or_else(|| default.map(expand_env).unwrap_or_default());
+            out.push_str(&value);
+            i = j;
+        } else {
+            out.push(input[i..].chars().next().unwrap());
+            i += input[i..].chars().next().unwrap().len_utf8();
+        }
+    }
+    out
 }
 
 #[cfg(test)]
@@ -150,6 +216,51 @@ telemetry = "generic-jsonl"
             ..Default::default()
         });
         assert_eq!(argv, ["tool", "--root", "C:/sb/t1", "--brief", "do the thing"]);
+    }
+
+    #[test]
+    fn env_expansion_prefers_the_override_and_falls_back() {
+        std::env::set_var("HARPIA_TEST_BIN", "C:/tools/thing.exe");
+        assert_eq!(
+            expand_env("${HARPIA_TEST_BIN:-/usr/bin/thing}"),
+            "C:/tools/thing.exe"
+        );
+        assert_eq!(
+            expand_env("${HARPIA_TEST_UNSET_BIN:-/usr/bin/thing}"),
+            "/usr/bin/thing"
+        );
+        // A default may itself hold a variable.
+        assert_eq!(
+            expand_env("${HARPIA_TEST_UNSET_BIN:-${HARPIA_TEST_BIN}/sub}"),
+            "C:/tools/thing.exe/sub"
+        );
+        std::env::remove_var("HARPIA_TEST_BIN");
+    }
+
+    #[test]
+    fn env_expansion_leaves_ordinary_text_alone() {
+        assert_eq!(expand_env("plain/path --flag"), "plain/path --flag");
+        assert_eq!(expand_env("{workspace}/src"), "{workspace}/src");
+        // Unterminated is left verbatim rather than guessed at.
+        assert_eq!(expand_env("${OPEN_FOREVER"), "${OPEN_FOREVER");
+        // Unset with no default expands to nothing, so the spawn fails loudly.
+        assert_eq!(expand_env("${HARPIA_TEST_DEFINITELY_UNSET}"), "");
+    }
+
+    #[test]
+    fn argv_expands_env_after_placeholders() {
+        std::env::set_var("HARPIA_TEST_ROOT", "D:/tools");
+        let m: Manifest = toml::from_str(
+            r#"
+id = "demo"
+command = ["${HARPIA_TEST_ROOT:-/opt}/run", "--root", "{workspace}"]
+telemetry = "generic-jsonl"
+"#,
+        )
+        .unwrap();
+        let argv = m.argv(&TrialVars { workspace: "C:/sb".into(), ..Default::default() });
+        assert_eq!(argv, ["D:/tools/run", "--root", "C:/sb"]);
+        std::env::remove_var("HARPIA_TEST_ROOT");
     }
 
     #[test]

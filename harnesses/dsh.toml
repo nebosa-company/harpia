@@ -5,7 +5,7 @@
 id = "dsh"
 command = [
     "wsl", "bash",
-    "/mnt/d/repos/harpia/harnesses/dsh-agent.sh",
+    "${HARPIA_DSH_AGENT:-/mnt/d/repos/harpia/harnesses/dsh-agent.sh}",
     "--workspace", "{workspace}",
     "--prompt-file", "{prompt_file}",
     "--session-id", "{session_id}",
