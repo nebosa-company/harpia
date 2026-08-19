@@ -1,2 +1,5 @@
 # Shell scripts run inside WSL: CRLF endings break bash. Always LF.
 *.sh text eol=lf
+
+# Bash task scripts run under WSL: CRLF breaks them.
+tasks/bash/** text eol=lf

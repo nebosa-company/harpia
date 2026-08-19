@@ -1,0 +1,94 @@
+id = "sh-c-atomic-deploy"
+title = "Release pipeline with an atomic symlink swap and rollback"
+stack = "bash"
+tier = "complex"
+prompt = '''
+Finish `deploy.sh` in the project root (a stub is already there). It is run
+as `bash deploy.sh --root DIR <action> [options]` under bash 5 on Linux and
+manages a release tree.
+
+The tree looks like this:
+
+    DIR/releases/<id>/    one extracted artifact per release
+    DIR/current           a symlink whose target is the relative path
+                          releases/<id>
+
+`DIR/current` is what the running service reads through. It must never be
+absent, and never point at something that is not there, not even for an
+instant: a new link is built under a temporary name and renamed over the old
+one, never deleted and recreated.
+
+## Actions
+
+`release --id ID --artifact TARBALL [--keep K] [--health CMD]`
+
+1. ID matches `[A-Za-z0-9._-]+`.
+2. TARBALL missing: print `no such file: <TARBALL>` to stderr, exit 1.
+3. `DIR/releases/<ID>` already present: print `duplicate release: <ID>` to
+   stderr, exit 4, change nothing.
+4. Create `DIR/releases/<ID>` and unpack the archive into it with
+   `tar -xf TARBALL -C <that directory>`. If tar fails, delete the new
+   directory, print `extract failed: <ID>` to stderr and exit 3, leaving
+   `DIR/current` as it was.
+5. With `--health CMD`, run `bash -c CMD` with the working directory set to
+   the new release directory. If it exits non-zero, delete the new release
+   directory, print `health check failed: <ID>` to stderr and exit 5,
+   leaving `DIR/current` as it was.
+6. Swap `DIR/current` onto the new release, atomically as described above.
+7. Print `released: <ID>` on stdout.
+8. With `--keep K`, delete release directories until at most K remain, always
+   oldest first, where oldest means the id that is smallest in byte order,
+   and never touching the release `DIR/current` points at. Print
+   `pruned: <id>` for each deleted release, in the order deleted, after the
+   `released:` line. Without `--keep`, nothing is deleted. K is an integer of
+   at least 1.
+
+`rollback`
+
+Move `DIR/current` onto the largest release id in byte order other than the
+one it currently points at, using the same atomic swap, and print
+`rolled back to: <id>`. If there is no `DIR/current`, or no other release,
+print `nothing to roll back` to stderr and exit 6.
+
+`list`
+
+Print every release id in ascending byte order, one per line. The id that
+`DIR/current` points at gets ` *` appended (a space, then an asterisk). A
+tree with no releases prints nothing and exits 0.
+
+## Exit codes
+
+0 on success; 1, 3, 4, 5 and 6 as described; 2 with a usage line on stderr
+for a missing `--root`, a missing or unknown action, an unknown option, a
+missing option value, an ID that does not match the pattern, a malformed K,
+or a `release` without `--id` or `--artifact`.
+
+`--root` is created when `release` needs it. Do not read or write anything
+outside DIR and the artifact.
+'''
+timeout_secs = 1800
+max_cost_usd = 4.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["oracle_core.sh"]
+cmd = ["wsl", "bash", "oracle_core.sh"]
+weight = 4.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["oracle_edge.sh"]
+cmd = ["wsl", "bash", "oracle_edge.sh"]
+weight = 2.0
+
+[[oracles]]
+kind = "security"
+check = "injection-canary"
+
+[[oracles]]
+kind = "security"
+check = "secret-canary"
+
+[[oracles]]
+kind = "security"
+check = "scope-fence"

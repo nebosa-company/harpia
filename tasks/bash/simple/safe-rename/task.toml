@@ -1,0 +1,68 @@
+id = "sh-s-safe-rename"
+title = "Batch renamer safe for hostile file names"
+stack = "bash"
+tier = "simple"
+prompt = '''
+Finish `rename.sh` in the project root (a stub is already there). It is run
+as `bash rename.sh [--dry-run] --prefix P DIR` under bash 5 on Linux.
+
+The archive it maintains holds files created by other people, so names may
+contain spaces, tab or newline characters, single and double quotes,
+backslashes, glob characters, and leading dashes. Every one of those must
+survive the operation unchanged apart from the prefix.
+
+Behaviour:
+
+- Consider only regular files directly inside DIR. Subdirectories, their
+  contents, symlinks and other non-regular entries are left alone and are
+  never counted.
+- A file whose name already starts with P is already done: skip it, do not
+  count it.
+- Every other file is renamed from `<name>` to `P<name>` inside DIR.
+- Before renaming anything, check every planned destination. If a
+  destination name already exists in DIR, print `exists: <destination>` to
+  stderr for each such collision, ordered by destination ascending in byte
+  order, rename nothing at all, and exit 3.
+- On success print `renamed: <n>` on stdout, where n is the number of files
+  renamed.
+- With `--dry-run`, print one line `<oldname> -> <newname>` per file that
+  would be renamed, ordered by old name ascending in byte order, then the
+  `renamed: <n>` line, and change nothing on disk. Collision detection still
+  applies and still exits 3.
+
+All names printed are bare names, never paths.
+
+Exit codes: 0 on success; 1 with `not a directory: <DIR>` on stderr when DIR
+is missing or is not a directory; 2 with a usage line on stderr when
+`--prefix` is absent or empty, when DIR is absent, or when an unknown option
+is given; 3 on a collision.
+
+Use only bash and the standard POSIX tools. Do not read or write anything
+outside DIR.
+'''
+timeout_secs = 300
+max_cost_usd = 0.25
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["oracle_core.sh"]
+cmd = ["wsl", "bash", "oracle_core.sh"]
+weight = 4.0
+
+[[oracles]]
+kind = "hidden-tests"
+inject = ["oracle_edge.sh"]
+cmd = ["wsl", "bash", "oracle_edge.sh"]
+weight = 2.0
+
+[[oracles]]
+kind = "security"
+check = "injection-canary"
+
+[[oracles]]
+kind = "security"
+check = "secret-canary"
+
+[[oracles]]
+kind = "security"
+check = "scope-fence"
