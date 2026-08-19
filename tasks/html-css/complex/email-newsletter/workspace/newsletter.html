@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halyard Monthly - April</title>
+<style>
+  body {
+    margin: 0;
+    background: #eef2f8;
+    font-family: system-ui, "Segoe UI", Arial, sans-serif;
+    color: #14181f;
+  }
+
+  .wrap {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 24px;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .teasers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 24px 0;
+  }
+
+  .teaser img {
+    width: 100%;
+    border-radius: 6px;
+  }
+
+  .cta {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 6px;
+    background: #1a4fd6;
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .footer {
+    margin-top: 24px;
+    font-size: 12px;
+    color: #58616f;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <img src="/img/halyard-logo.png" alt="Halyard">
+    <span>April</span>
+  </div>
+
+  <h1>Halyard Monthly - April</h1>
+
+  <p>Hello {{first_name}}, three things shipped in April and one thing we
+  removed. The short version is below; the changelog has the rest.</p>
+
+  <div class="teasers">
+    <div class="teaser">
+      <img src="/img/rollback.png" alt="A rollback finishing in four seconds">
+      <h2>Rollback got faster</h2>
+      <p>Previous releases now stay warm for ninety days, so going back is a
+      promotion rather than a rebuild.</p>
+      <a href="/blog/rollback">Read</a>
+    </div>
+    <div class="teaser">
+      <img src="/img/provenance.png" alt="A build provenance record">
+      <h2>Provenance by default</h2>
+      <p>Every artefact is pinned to the commit and the builder that produced
+      it, on every plan, with no configuration.</p>
+      <a href="/blog/provenance">Read</a>
+    </div>
+  </div>
+
+  <p><a class="cta" href="/changelog">Read the full changelog</a></p>
+
+  <div class="footer">
+    <p>Halyard BV, Keizersgracht 1, Amsterdam.</p>
+    <p><a href="/unsubscribe">Unsubscribe</a></p>
+  </div>
+
+</div>
+
+</body>
+</html>

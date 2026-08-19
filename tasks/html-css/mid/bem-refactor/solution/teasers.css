@@ -1,0 +1,86 @@
+/* One block, its elements and two modifiers. Element classes stand on their
+   own; only modifier-scoped overrides use a descendant combinator. */
+
+:root {
+  --ink: #171b22;
+  --muted: #5b6472;
+  --line: #d7dde6;
+  --accent: #1257c9;
+  --surface: #f6f8fc;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.page {
+  max-width: 54rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.teasers {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.media {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1.5rem;
+}
+
+.media__figure {
+  margin: 0;
+}
+
+.media__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.media__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.media__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+}
+
+.media__meta {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.media__link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.media--featured {
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.media--featured .media__title {
+  font-size: 1.5rem;
+}
+
+.media--compact {
+  grid-template-columns: 7rem 1fr;
+}
+
+.media--compact .media__title {
+  font-size: 1rem;
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create your account</title>
+<link rel="stylesheet" href="form.css">
+</head>
+<body>
+
+<h1>Create your account</h1>
+
+<form class="signup" action="/signup" method="post">
+
+  <div class="field">
+    <b>Full name</b>
+    <input type="text" name="full_name" class="field__input" placeholder="Full name">
+  </div>
+
+  <div class="field">
+    <b>Email address</b>
+    <input type="text" name="email" class="field__input" placeholder="you@example.com">
+    <div class="field__hint">We only use this for account notices.</div>
+  </div>
+
+  <div class="field">
+    <b>Password</b>
+    <input type="text" name="password" class="field__input" placeholder="Password">
+    <div class="field__hint">At least 12 characters, including one number.</div>
+  </div>
+
+  <div class="field field--group">
+    <b>Plan</b>
+    <input type="radio" name="plan" value="basic">
+    Basic
+    <input type="radio" name="plan" value="pro">
+    Pro
+  </div>
+
+  <div class="field field--check">
+    <input type="checkbox" name="terms">
+    I accept the <a href="/terms">terms of service</a>.
+  </div>
+
+  <input type="button" class="btn" value="Create account">
+
+</form>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+/* Page frame only. Neither widget has any behaviour yet. */
+
+:root {
+  --ink: #171b22;
+  --muted: #5b6472;
+  --line: #d7dde6;
+  --accent: #1257c9;
+  --surface: #f4f7fb;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+main {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h2 {
+  margin-top: 2.5rem;
+}
+
+.accordion,
+.tabs {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}

@@ -1,0 +1,62 @@
+/* One hard-coded light palette. Every component knows its own colours, so
+   there is nowhere to swap a theme in. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #171b22;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  line-height: 1.55;
+}
+
+.page {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.card {
+  background: #f4f7fb;
+  color: #171b22;
+  border: 1px solid #d7dde6;
+  border-radius: 10px;
+  padding: 1rem 1.25rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.card__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+}
+
+.muted {
+  color: #5b6472;
+  font-size: 0.9375rem;
+  margin: 0 0 0.75rem;
+}
+
+.field {
+  margin: 0 0 0.375rem;
+}
+
+.field__label {
+  color: #5b6472;
+  display: inline-block;
+  min-width: 6rem;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d7dde6;
+  border-radius: 6px;
+  color: #1257c9;
+  text-decoration: none;
+}

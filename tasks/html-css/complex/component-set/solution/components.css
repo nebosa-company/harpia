@@ -1,0 +1,213 @@
+/* Every component below is markup plus the cascade. No script anywhere. */
+
+:root {
+  --ink: #14181f;
+  --muted: #58616f;
+  --line: #d5dce8;
+  --accent: #1a4fd6;
+  --surface: #f5f8fd;
+  --danger: #b3261e;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.demo {
+  border-top: 1px solid var(--line);
+  padding-block: 1.5rem;
+}
+
+.demo h2 {
+  margin-block: 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+/* --- utilities ---------------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.5rem;
+  z-index: 10;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: var(--surface);
+  border-radius: 6px;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  left: 1rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- breadcrumb --------------------------------------------------------- */
+
+.breadcrumb__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb__item + .breadcrumb__item::before {
+  content: "/";
+  margin-right: 0.5rem;
+  color: var(--muted);
+}
+
+.breadcrumb__link {
+  color: var(--accent);
+}
+
+.breadcrumb__link[aria-current="page"] {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+/* --- switch ------------------------------------------------------------- */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.switch__label {
+  cursor: pointer;
+}
+
+.switch__input:checked + .switch__label {
+  font-weight: 600;
+}
+
+.switch__input:focus-visible + .switch__label {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- disclosure --------------------------------------------------------- */
+
+.disclosure {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.disclosure__summary {
+  cursor: pointer;
+}
+
+.disclosure[open] .disclosure__summary {
+  font-weight: 600;
+}
+
+.disclosure__panel {
+  color: var(--muted);
+}
+
+/* --- progress ----------------------------------------------------------- */
+
+.progress__label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.progress {
+  width: 100%;
+  height: 0.75rem;
+}
+
+/* --- alert -------------------------------------------------------------- */
+
+.alert {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+}
+
+.alert--error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* --- tooltip ------------------------------------------------------------ */
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip__trigger {
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  border-bottom: 1px dotted var(--accent);
+  padding: 0;
+  cursor: help;
+}
+
+.tooltip__bubble {
+  visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 5;
+  width: 18rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--ink);
+  color: var(--surface);
+  border-radius: 6px;
+  font-size: 0.9375rem;
+}
+
+.tooltip:hover .tooltip__bubble {
+  visibility: visible;
+}
+
+.tooltip:focus-within .tooltip__bubble {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
+  }
+}

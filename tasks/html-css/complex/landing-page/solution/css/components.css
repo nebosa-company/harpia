@@ -1,0 +1,131 @@
+/* Skip link, buttons, plans, focus treatment. */
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-2);
+  z-index: 10;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  border-radius: var(--radius);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  left: var(--space-3);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.site-header__brand {
+  color: var(--color-fg);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-nav a,
+.site-footer a {
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.btn {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius);
+  text-decoration: none;
+  border: 1px solid transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+}
+
+.feature {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.feature__title {
+  margin-block: 0 var(--space-2);
+}
+
+.feature__text {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.plan {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.plan--featured {
+  border-color: var(--color-accent);
+}
+
+.plan__price {
+  font-size: 1.5rem;
+  margin-block: 0 var(--space-3);
+}
+
+.plan__features {
+  margin-block: 0 var(--space-4);
+  padding-left: var(--space-4);
+  color: var(--color-muted);
+}
+
+.faq__item {
+  border-bottom: 1px solid var(--color-border);
+  padding-block: var(--space-2);
+}
+
+.faq__q {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.contact-form {
+  max-width: var(--measure);
+}
+
+.field__input {
+  display: block;
+  width: 100%;
+  max-width: 24rem;
+  margin-block: var(--space-1) 0;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+}
+
+.field__hint {
+  margin-block: var(--space-2) var(--space-3);
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+}
+
+.site-footer__legal {
+  margin-block: var(--space-3) 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
+  }
+}

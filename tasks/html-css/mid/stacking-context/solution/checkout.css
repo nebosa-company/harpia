@@ -1,0 +1,107 @@
+/* Checkout shell and confirmation dialog. */
+
+:root {
+  --ink: #171b22;
+  --muted: #5b6472;
+  --line: #d7dde6;
+  --accent: #1257c9;
+  --paper: #ffffff;
+  --shell: #f2f5fa;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  line-height: 1.55;
+}
+
+/* No transform / will-change here: promoting the shell made it a stacking
+   context, and everything inside it was then trapped below the shell's own
+   level no matter how large its z-index. */
+.page-shell {
+  min-height: 100vh;
+  background: var(--shell);
+}
+
+.page-shell__bar {
+  padding: 1rem 1.5rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.page-shell__brand {
+  font-weight: 700;
+}
+
+.page-shell__body {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.modal.is-open {
+  display: block;
+}
+
+.modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgba(10, 14, 22, 0.55);
+}
+
+.modal__dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: min(28rem, calc(100% - 2rem));
+  transform: translate(-50%, -50%);
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.modal__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+.modal__body {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+}
+
+.modal__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.modal__button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  font: inherit;
+  cursor: pointer;
+}
+
+.modal__button--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create your account</title>
+<link rel="stylesheet" href="form.css">
+</head>
+<body>
+
+<h1>Create your account</h1>
+
+<form class="signup" action="/signup" method="post">
+
+  <div class="field">
+    <label for="full-name">Full name</label>
+    <input type="text" id="full-name" name="full_name" class="field__input"
+           required autocomplete="name">
+  </div>
+
+  <div class="field">
+    <label for="email">Email address</label>
+    <input type="email" id="email" name="email" class="field__input"
+           required autocomplete="email" aria-describedby="email-hint">
+    <p id="email-hint" class="field__hint">We only use this for account notices.</p>
+  </div>
+
+  <div class="field">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" class="field__input"
+           required autocomplete="new-password" aria-describedby="password-hint">
+    <p id="password-hint" class="field__hint">At least 12 characters, including one number.</p>
+  </div>
+
+  <fieldset class="field field--group">
+    <legend>Plan</legend>
+    <input type="radio" id="plan-basic" name="plan" value="basic" checked>
+    <label for="plan-basic">Basic</label>
+    <input type="radio" id="plan-pro" name="plan" value="pro">
+    <label for="plan-pro">Pro</label>
+  </fieldset>
+
+  <div class="field field--check">
+    <input type="checkbox" id="terms" name="terms" required>
+    <label for="terms">I accept the <a href="/terms">terms of service</a>.</label>
+  </div>
+
+  <button type="submit" class="btn">Create account</button>
+
+</form>
+
+</body>
+</html>

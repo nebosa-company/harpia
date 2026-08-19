@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handbook: incident response</title>
+<link rel="stylesheet" href="screen.css">
+<link rel="stylesheet" href="print.css" media="print">
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Primary">
+  <ul>
+    <li><a href="/handbook">Handbook</a></li>
+    <li><a href="/handbook/incidents">Incidents</a></li>
+    <li><a href="/handbook/security">Security</a></li>
+  </ul>
+</nav>
+
+<div class="share-bar no-print">
+  <a href="https://example.com/share/mail">Email this page</a>
+  <a href="https://example.com/share/link">Copy link</a>
+</div>
+
+<main>
+  <h1>Incident response</h1>
+
+  <p>An incident starts the moment someone declares one. Nobody needs
+  permission to declare, and no declaration is ever held against the person
+  who made it.</p>
+
+  <h2>Declaring</h2>
+  <p>Post in the incident channel with the severity, the user-visible symptom
+  and the time you first saw it. The bot opens a document and a call.</p>
+
+  <figure>
+    <pre>SEV2 - checkout returns 502 for ~4% of sessions - first seen 09:14 UTC</pre>
+    <figcaption>A declaration that gives the responder everything they need.</figcaption>
+  </figure>
+
+  <h2>Roles</h2>
+  <p>Three roles are filled before anything else: incident commander, comms,
+  and scribe. See the <a href="https://example.com/roles">role definitions</a>
+  for what each one owns.</p>
+
+  <h3>Commander</h3>
+  <p>Owns the decision log. Does not debug.</p>
+
+  <h3>Comms</h3>
+  <p>Owns the status page and the customer-facing timeline. Publishes on a
+  fixed cadence even when there is nothing new.</p>
+
+  <table>
+    <caption>Severity ladder</caption>
+    <thead><tr><th scope="col">Level</th><th scope="col">Meaning</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">SEV1</th><td>Complete outage or data loss.</td></tr>
+      <tr><th scope="row">SEV2</th><td>Major feature degraded for many users.</td></tr>
+      <tr><th scope="row">SEV3</th><td>Contained, with a workaround.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>After</h2>
+  <p>The review happens within five working days, and the document is public
+  inside the company. See the <a href="https://example.com/review">review
+  template</a>.</p>
+
+  <img src="img/timeline.png" alt="Timeline of a sample SEV2 incident" width="900" height="300">
+</main>
+
+<a class="to-top no-print" href="#top">Back to top</a>
+
+<footer>
+  <p>Last reviewed 12 April 2024.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+/* Both widgets run on markup and the cascade alone. */
+
+:root {
+  --ink: #171b22;
+  --muted: #5b6472;
+  --line: #d7dde6;
+  --accent: #1257c9;
+  --surface: #f4f7fb;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+main {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h2 {
+  margin-top: 2.5rem;
+}
+
+.accordion,
+.tabs {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+/* --- accordion ---------------------------------------------------------- */
+
+.accordion__item {
+  border-bottom: 1px solid var(--line);
+}
+
+.accordion__summary {
+  cursor: pointer;
+  padding: 0.75rem 0;
+  font-size: 1.0625rem;
+}
+
+.accordion__summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.accordion__item[open] .accordion__summary {
+  font-weight: 700;
+}
+
+.accordion__panel {
+  padding: 0 0 0.75rem;
+  color: var(--muted);
+}
+
+/* --- tabs --------------------------------------------------------------- */
+
+/* Off-screen but still focusable: display:none would take the tab strip
+   out of the keyboard order entirely. */
+.tabs__radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  margin: 0;
+}
+
+.tabs__list {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs__label {
+  cursor: pointer;
+  padding: 0.625rem 1rem;
+  color: var(--muted);
+}
+
+.tabs__radio:focus-visible ~ .tabs__list {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tabs__panel {
+  display: none;
+  padding: 1rem 0;
+}
+
+#tab-1:checked ~ .tabs__panels #panel-1 {
+  display: block;
+}
+
+#tab-2:checked ~ .tabs__panels #panel-2 {
+  display: block;
+}
+
+#tab-3:checked ~ .tabs__panels #panel-3 {
+  display: block;
+}
+
+#tab-1:checked ~ .tabs__list .tabs__label[for="tab-1"],
+#tab-2:checked ~ .tabs__list .tabs__label[for="tab-2"],
+#tab-3:checked ~ .tabs__list .tabs__label[for="tab-3"] {
+  color: var(--ink);
+  background: var(--surface);
+  font-weight: 600;
+}

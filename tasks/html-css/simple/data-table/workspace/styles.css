@@ -1,0 +1,19 @@
+body {
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+  max-width: 46rem;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: #171b22;
+  line-height: 1.5;
+}
+
+.report {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report th,
+.report td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #dde2ea;
+}

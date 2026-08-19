@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scriptless components</title>
+<link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main id="main" class="page">
+
+<h1>Scriptless components</h1>
+<p>Every component below works with native element semantics and CSS alone.</p>
+
+<section class="demo">
+  <h2>Breadcrumb</h2>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol class="breadcrumb__list">
+      <li class="breadcrumb__item"><a class="breadcrumb__link" href="/account">Account</a></li>
+      <li class="breadcrumb__item"><a class="breadcrumb__link" href="/account/billing">Billing</a></li>
+      <li class="breadcrumb__item"><a class="breadcrumb__link" href="/account/billing/invoices" aria-current="page">Invoices</a></li>
+    </ol>
+  </nav>
+</section>
+
+<section class="demo">
+  <h2>Switch</h2>
+  <span class="switch">
+    <input class="switch__input" type="checkbox" id="switch-emails" role="switch" checked>
+    <label class="switch__label" for="switch-emails">Product emails</label>
+  </span>
+</section>
+
+<section class="demo">
+  <h2>Disclosure</h2>
+  <details class="disclosure">
+    <summary class="disclosure__summary">What counts as an active project?</summary>
+    <div class="disclosure__panel">
+      <p>A project is active in a billing period if it received at least one
+      deploy or one API call during that period.</p>
+    </div>
+  </details>
+</section>
+
+<section class="demo">
+  <h2>Progress</h2>
+  <label class="progress__label" for="upload">Upload</label>
+  <progress class="progress" id="upload" max="100" value="72">72%</progress>
+</section>
+
+<section class="demo">
+  <h2>Alert</h2>
+  <div class="alert alert--error" role="alert">
+    The invoice could not be exported. Try again, or contact support if it
+    keeps failing.
+  </div>
+</section>
+
+<section class="demo">
+  <h2>Tooltip</h2>
+  <span class="tooltip">
+    <button class="tooltip__trigger" type="button" aria-describedby="tip-retention">Retention</button>
+    <span class="tooltip__bubble" id="tip-retention" role="tooltip">How long deploy
+    records and logs are kept before they are pruned.</span>
+  </span>
+</section>
+
+</main>
+
+</body>
+</html>

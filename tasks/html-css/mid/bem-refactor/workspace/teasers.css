@@ -1,0 +1,86 @@
+/* Grown over three redesigns. `.thumb` and `.hdr` now collide with the app
+   shell's own utilities. */
+
+:root {
+  --ink: #171b22;
+  --muted: #5b6472;
+  --line: #d7dde6;
+  --accent: #1257c9;
+  --surface: #f6f8fc;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.page {
+  max-width: 54rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.teasers {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.card-wrap {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1.5rem;
+}
+
+.thumb {
+  margin: 0;
+}
+
+.card-wrap .thumb-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.txt {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-wrap .hdr {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+}
+
+.card-wrap .sub {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.more {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.feat {
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.feat .hdr {
+  font-size: 1.5rem;
+}
+
+.tight {
+  grid-template-columns: 7rem 1fr;
+}
+
+.tight .hdr {
+  font-size: 1rem;
+}

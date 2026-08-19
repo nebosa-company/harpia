@@ -1,0 +1,89 @@
+/* Pricing page. Tokens are shared with the app shell -- do not retune them. */
+
+:root {
+  --promo-bg: #8a1220;
+  --promo-fg: #fff5f0;
+  --accent: #0b6cf5;
+  --ink: #171b22;
+  --paper: #ffffff;
+  --tint: #f2f5fa;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  line-height: 1.55;
+}
+
+main {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+/* --- navigation --------------------------------------------------------- */
+
+.nav {
+  border-bottom: 1px solid #dfe4ec;
+}
+
+.nav__list {
+  display: flex;
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+}
+
+.nav .nav__link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+}
+
+/* Matches the base rule's specificity and comes after it, so the current
+   page's link actually gets the accent. */
+.nav .nav__link--active {
+  text-decoration-color: var(--accent);
+}
+
+/* --- promo banner ------------------------------------------------------- */
+
+.promo {
+  background: var(--promo-bg);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.promo__text {
+  color: var(--promo-fg);
+  margin: 0;
+  font-weight: 600;
+}
+
+/* --- section utilities (Q1 redesign) ------------------------------------ */
+
+.section {
+  padding: 1.5rem 0;
+}
+
+.section--tinted {
+  background: var(--tint);
+  padding: 1.5rem 1.25rem;
+  border-radius: 10px;
+}
+
+/* The tint utility only ever meant to recolour the small print; reaching
+   into the banner painted its text onto its own background. */
+.section--tinted .note {
+  color: var(--promo-bg);
+}
+
+.note {
+  font-size: 0.9375rem;
+}

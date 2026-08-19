@@ -1,0 +1,39 @@
+/* Page frame and tokens. No component has any styling yet. */
+
+:root {
+  --ink: #14181f;
+  --muted: #58616f;
+  --line: #d5dce8;
+  --accent: #1a4fd6;
+  --surface: #f5f8fd;
+  --danger: #b3261e;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.demo {
+  border-top: 1px solid var(--line);
+  padding-block: 1.5rem;
+}
+
+.demo h2 {
+  margin-block: 0 0.5rem;
+  font-size: 1.125rem;
+}

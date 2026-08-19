@@ -1,0 +1,50 @@
+/* Pre-grid layout. Margins leak, the last row never clears, and the
+   percentage widths were tuned for a 960px page that no longer exists. */
+
+body {
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+  max-width: 72rem;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: #191d24;
+  line-height: 1.55;
+}
+
+.card-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+.card {
+  float: left;
+  width: 31.3333%;
+  margin: 0 1% 2% 1%;
+  border: 1px solid #d8dde5;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.card__media img {
+  width: 100%;
+}
+
+.card__body {
+  padding: 0.875rem 1rem;
+}
+
+.card__title {
+  margin: 0 0 0.375rem;
+  font-size: 1.125rem;
+}
+
+.card__text {
+  margin: 0;
+  color: #4d5665;
+}
+
+.card__footer {
+  padding: 0 1rem 1rem;
+}

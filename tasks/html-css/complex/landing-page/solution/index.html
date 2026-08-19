@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halyard - release automation</title>
+<meta name="description" content="Halyard takes the release checklist off your team: build provenance, staged rollout and a rollback that finishes in seconds.">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="site-header__brand" href="/">Halyard</a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section id="hero" aria-labelledby="hero-title">
+    <div class="container">
+      <h1 id="hero-title">Ship the boring parts on Friday</h1>
+      <p class="hero__lede">Halyard owns the release checklist so your team does
+      not have to: signed build provenance, a staged rollout you can watch, and a
+      rollback that finishes before the incident channel wakes up.</p>
+      <a class="btn btn--primary" href="#contact">Start a free trial</a>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-title">
+    <div class="container">
+      <h2 id="features-title">What you get</h2>
+      <ul class="feature-grid">
+        <li class="feature">
+          <h3 class="feature__title">Provenance by default</h3>
+          <p class="feature__text">Every artefact is pinned to the commit and the
+          builder that produced it, and the record outlives the pipeline.</p>
+        </li>
+        <li class="feature">
+          <h3 class="feature__title">Staged rollout</h3>
+          <p class="feature__text">Promote by cohort, watch the error budget, and
+          stop the release from the same screen you started it on.</p>
+        </li>
+        <li class="feature">
+          <h3 class="feature__title">Rollback in seconds</h3>
+          <p class="feature__text">Previous releases stay warm for ninety days, so
+          going back is a promotion rather than a rebuild.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="pricing" aria-labelledby="pricing-title">
+    <div class="container">
+      <h2 id="pricing-title">Pricing</h2>
+      <div class="plan-grid">
+
+        <article class="plan">
+          <h3 class="plan__name">Solo</h3>
+          <p class="plan__price">EUR 0 / month</p>
+          <ul class="plan__features">
+            <li>One project</li>
+            <li>Seven days of release history</li>
+            <li>Community support</li>
+          </ul>
+          <a class="btn btn--primary" href="#contact">Start free</a>
+        </article>
+
+        <article class="plan plan--featured">
+          <h3 class="plan__name">Team</h3>
+          <p class="plan__price">EUR 99 / month</p>
+          <ul class="plan__features">
+            <li>Unlimited projects</li>
+            <li>Ninety days of release history</li>
+            <li>Staged rollout and instant rollback</li>
+          </ul>
+          <a class="btn btn--primary" href="#contact">Start a free trial</a>
+        </article>
+
+        <article class="plan">
+          <h3 class="plan__name">Enterprise</h3>
+          <p class="plan__price">Let us talk</p>
+          <ul class="plan__features">
+            <li>Self-hosted runners</li>
+            <li>Audit export and retention controls</li>
+            <li>Named support engineer</li>
+          </ul>
+          <a class="btn btn--primary" href="#contact">Contact sales</a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-title">
+    <div class="container">
+      <h2 id="faq-title">Questions</h2>
+
+      <details class="faq__item">
+        <summary class="faq__q">Does Halyard need access to our source?</summary>
+        <p>No. Halyard reads build metadata and artefacts; the repository stays
+        where it is.</p>
+      </details>
+
+      <details class="faq__item">
+        <summary class="faq__q">Can we run it on our own hardware?</summary>
+        <p>Self-hosted runners are part of the Enterprise plan, and the control
+        plane can be pinned to one region.</p>
+      </details>
+
+      <details class="faq__item">
+        <summary class="faq__q">What happens to a release we roll back?</summary>
+        <p>It stays addressable. Rolling back promotes the previous artefact
+        rather than deleting the current one.</p>
+      </details>
+
+      <details class="faq__item">
+        <summary class="faq__q">How long is the trial?</summary>
+        <p>Thirty days, with no card. At the end the project becomes read-only
+        rather than disappearing.</p>
+      </details>
+
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <div class="container">
+      <h2 id="contact-title">Start a free trial</h2>
+      <form class="contact-form" action="/trial" method="post">
+        <label for="contact-email">Work email</label>
+        <input class="field__input" type="email" id="contact-email" name="email"
+               required autocomplete="email" aria-describedby="contact-hint">
+        <p class="field__hint" id="contact-hint">We use this to create the trial
+        workspace and for nothing else.</p>
+        <button type="submit" class="btn btn--primary">Start a free trial</button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="/security">Security</a></li>
+        <li><a href="/status">Status</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+      </ul>
+    </nav>
+    <p class="site-footer__legal">Halyard BV, Amsterdam. Prices exclude VAT.</p>
+  </div>
+</footer>
+
+</body>
+</html>

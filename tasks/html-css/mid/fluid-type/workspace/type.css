@@ -1,0 +1,57 @@
+/* Fixed pixel sizes that jump at two breakpoints. The steps are invisible at
+   widths in between, and a reader who has raised their default text size
+   gets nothing. */
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: #171b22;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.specimen {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: 33px;
+}
+
+h2 {
+  font-size: 28px;
+}
+
+h3 {
+  font-size: 23px;
+}
+
+h4 {
+  font-size: 19px;
+}
+
+small {
+  font-size: 13px;
+}
+
+@media (min-width: 48rem) {
+  h1 {
+    font-size: 44px;
+  }
+
+  h2 {
+    font-size: 36px;
+  }
+}
+
+@media (min-width: 72rem) {
+  h1 {
+    font-size: 58px;
+  }
+
+  h2 {
+    font-size: 45px;
+  }
+}

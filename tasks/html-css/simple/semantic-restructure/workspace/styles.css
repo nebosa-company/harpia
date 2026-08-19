@@ -1,0 +1,88 @@
+/* Frozen: these class names are what the CMS preview iframe expects. */
+
+:root {
+  --ink: #1b1f27;
+  --muted: #5b6472;
+  --rule: #dfe3ea;
+  --accent: #1257c9;
+  --measure: 62ch;
+}
+
+body {
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+  max-width: 70rem;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.site-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.site-nav a {
+  color: var(--accent);
+  margin-right: 1rem;
+  text-decoration: none;
+}
+
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  text-decoration: underline;
+}
+
+.content {
+  max-width: var(--measure);
+}
+
+.post {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.post__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+
+.post__date {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.post__excerpt {
+  margin: 0.5rem 0 0;
+}
+
+.sidebar {
+  margin-top: 2.5rem;
+  padding: 1rem;
+  background: #f5f7fa;
+  border-radius: 8px;
+  max-width: var(--measure);
+}
+
+.sidebar__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.site-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.9rem;
+}

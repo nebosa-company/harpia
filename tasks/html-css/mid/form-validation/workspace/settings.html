@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account settings</title>
+<link rel="stylesheet" href="form.css">
+</head>
+<body>
+
+<main class="page">
+
+<h1>Account settings</h1>
+
+<form class="settings" action="/account/settings" method="post">
+
+  <div class="field">
+    <label class="field__label" for="display-name">Display name</label>
+    <input class="field__input" type="text" id="display-name" name="display_name" required>
+    <p class="field__error">Enter a display name.</p>
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="email">Email address</label>
+    <input class="field__input" type="email" id="email" name="email" required>
+    <p class="field__error">Enter a valid email address.</p>
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="website">Website</label>
+    <input class="field__input" type="url" id="website" name="website">
+    <p class="field__error">Enter a full address, starting with https://.</p>
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="postcode">Postcode</label>
+    <input class="field__input" type="text" id="postcode" name="postcode" required
+           pattern="[0-9]{4} ?[A-Z]{2}">
+    <p class="field__error">Four digits and two capital letters, for example 1012 AB.</p>
+  </div>
+
+  <button type="submit" class="btn">Save changes</button>
+
+</form>
+
+</main>
+
+</body>
+</html>

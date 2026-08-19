@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout</title>
+<link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+  <header class="page-shell__bar">
+    <span class="page-shell__brand">Meridian</span>
+  </header>
+
+  <main class="page-shell__body">
+    <h1>Confirm your order</h1>
+    <p>Team plan, annual. Renews 1 March 2025.</p>
+    <p>The dialog below is left open so it can be inspected; in the running
+    application the class <code>is-open</code> is added by the checkout flow.</p>
+  </main>
+
+</div>
+
+<div class="modal is-open">
+  <div class="modal__overlay" aria-hidden="true"></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 class="modal__title" id="modal-title">Confirm your order</h2>
+    <p class="modal__body">You will be charged EUR 1,188 today. Your next
+    invoice is dated 1 March 2025.</p>
+    <div class="modal__actions">
+      <button type="button" class="modal__button modal__button--ghost">Cancel</button>
+      <button type="button" class="modal__button modal__button--primary">Confirm</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

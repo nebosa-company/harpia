@@ -1,0 +1,45 @@
+/* Paper rules. Loaded with media="print", so nothing here touches screen. */
+
+@page {
+  margin: 2cm;
+}
+
+body {
+  font-size: 12pt;
+  color: #000;
+  background: #fff;
+}
+
+.site-nav,
+.share-bar,
+.no-print {
+  display: none;
+}
+
+a[href^="http"]::after {
+  content: " (" attr(href) ")";
+  font-size: 10pt;
+  word-break: break-all;
+}
+
+h1,
+h2,
+h3 {
+  break-after: avoid;
+}
+
+table,
+figure,
+pre,
+blockquote {
+  break-inside: avoid;
+}
+
+p {
+  orphans: 3;
+  widows: 3;
+}
+
+img {
+  max-width: 100%;
+}

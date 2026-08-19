@@ -1,0 +1,45 @@
+/* Flat bar only. Nothing here opens or closes anything yet. */
+
+:root {
+  --nav-bg: #10192b;
+  --nav-fg: #e8eefc;
+  --nav-accent: #63a4ff;
+  --panel-bg: #ffffff;
+  --panel-fg: #1a2030;
+  --panel-line: #d5dbe6;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: #1a2030;
+  line-height: 1.55;
+}
+
+main {
+  padding: 2rem 1.5rem;
+}
+
+.site-nav {
+  background: var(--nav-bg);
+  color: var(--nav-fg);
+  padding: 0 1rem;
+}
+
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.menu__link {
+  display: block;
+  padding: 0.875rem 1rem;
+  color: var(--nav-fg);
+  text-decoration: none;
+}
+
+.menu__link:hover {
+  color: var(--nav-accent);
+}

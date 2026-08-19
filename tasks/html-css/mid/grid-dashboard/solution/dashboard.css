@@ -1,0 +1,94 @@
+/* Named-area shell. The mobile order is restated in one place instead of
+   reordering the DOM. */
+
+:root {
+  --shell-bg: #f2f5fa;
+  --panel-bg: #ffffff;
+  --line: #d7dde6;
+  --ink: #171b22;
+  --muted: #5b6472;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--shell-bg);
+  color: var(--ink);
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  line-height: 1.55;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-areas:
+    "brand topbar"
+    "sidenav main"
+    "sidenav footer";
+  grid-template-columns: 16rem 1fr;
+  grid-template-rows: 4rem 1fr auto;
+  gap: 1rem;
+  min-height: 100vh;
+}
+
+.dashboard__brand {
+  grid-area: brand;
+  padding: 1rem;
+  font-weight: 700;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.dashboard__topbar {
+  grid-area: topbar;
+  padding: 1rem;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.dashboard__sidenav {
+  grid-area: sidenav;
+}
+
+.dashboard__sidenav ul {
+  list-style: none;
+  margin: 0;
+  padding: 1rem;
+}
+
+.dashboard__main {
+  grid-area: main;
+  padding: 1rem;
+}
+
+.dashboard__footer {
+  grid-area: footer;
+  padding: 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 48rem) {
+  .dashboard {
+    grid-template-areas:
+      "brand"
+      "topbar"
+      "main"
+      "sidenav"
+      "footer";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+}

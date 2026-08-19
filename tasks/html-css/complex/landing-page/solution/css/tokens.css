@@ -1,0 +1,30 @@
+/* Custom properties live here, and nothing else. */
+
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f5f8fd;
+  --color-fg: #14181f;
+  --color-muted: #58616f;
+  --color-accent: #1a4fd6;
+  --color-accent-fg: #ffffff;
+  --color-border: #d5dce8;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2rem;
+  --space-6: 3rem;
+  --radius: 10px;
+  --measure: 68ch;
+  --container: 72rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0d1117;
+    --color-surface: #161b22;
+    --color-fg: #e8edf5;
+    --color-muted: #9aa5b4;
+    --color-border: #2a323d;
+  }
+}

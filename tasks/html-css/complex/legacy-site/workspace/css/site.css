@@ -1,0 +1,126 @@
+/* Edited by four people over three years. Handle with care. */
+
+:root {
+  --ink: #14181f;
+  --muted: #58616f;
+  --line: #d5dce8;
+  --accent: #1a4fd6;
+  --surface: #f5f8fd;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0;
+  padding: 0 1.5rem;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 1rem;
+}
+
+.site-header__brand {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-nav ul {
+  display: flex;
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.site-nav a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.site-grid {
+  display: grid;
+  grid-template-areas:
+    "main aside"
+    "main notes";
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  gap: 1.5rem;
+  padding-block: 2rem 3rem;
+}
+
+.site-grid__main {
+  grid-area: main;
+}
+
+.site-grid__aside {
+  grid-area: aside;
+}
+
+.site-grid__notes {
+  grid-area: notes;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.card__title {
+  margin-block: 0 0.25rem;
+  font-size: 1.0625rem;
+}
+
+.card__body {
+  margin: 0;
+  color: var(--muted);
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding-block: 1.5rem 2rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 48rem) {
+  .site-grid {
+    grid-template-areas:
+      "main"
+      "aside"
+      "notes";
+    grid-template-columns: 1fr;
+  }
+
+  .site-nav ul {
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .site-header__inner {
+    padding-block: 1.25rem;
+  }
+}

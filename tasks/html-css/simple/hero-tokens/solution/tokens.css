@@ -1,0 +1,14 @@
+/* Brand tokens. Nothing but :root lives in this file. */
+
+:root {
+  --hero-bg: #0f1729;
+  --hero-fg: #f4f7ff;
+  --hero-accent: #ffb347;
+  --hero-accent-ink: #2a1a00;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --radius-lg: 12px;
+  --measure: 60ch;
+}

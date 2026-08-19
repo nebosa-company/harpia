@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help centre</title>
+<link rel="stylesheet" href="widgets.css">
+</head>
+<body>
+
+<main>
+
+<h1>Help centre</h1>
+
+<h2>Frequently asked questions</h2>
+
+<div class="accordion">
+
+  <details class="accordion__item" open>
+    <summary class="accordion__summary">How long does a restore take?</summary>
+    <div class="accordion__panel">
+      <p>A restore of the most recent snapshot completes in under ten minutes for
+      projects below 50 GB. Larger projects are streamed and stay readable while
+      the restore runs.</p>
+    </div>
+  </details>
+
+  <details class="accordion__item">
+    <summary class="accordion__summary">Can I move a project between organisations?</summary>
+    <div class="accordion__panel">
+      <p>Yes, from the project settings page. Membership is not carried across;
+      everyone who needs access has to be invited again on the other side.</p>
+    </div>
+  </details>
+
+  <details class="accordion__item">
+    <summary class="accordion__summary">What happens when a trial ends?</summary>
+    <div class="accordion__panel">
+      <p>The project becomes read-only for thirty days. Nothing is deleted in that
+      window, and adding a payment method restores write access immediately.</p>
+    </div>
+  </details>
+
+</div>
+
+<h2>Getting started</h2>
+
+<div class="tabs">
+
+  <input type="radio" name="tabs" class="tabs__radio" id="tab-1" checked>
+  <input type="radio" name="tabs" class="tabs__radio" id="tab-2">
+  <input type="radio" name="tabs" class="tabs__radio" id="tab-3">
+
+  <div class="tabs__list">
+    <label class="tabs__label" for="tab-1">Install</label>
+    <label class="tabs__label" for="tab-2">Configure</label>
+    <label class="tabs__label" for="tab-3">Deploy</label>
+  </div>
+
+  <div class="tabs__panels">
+    <div class="tabs__panel" id="panel-1">
+      <p>Download the CLI for your platform and put it on your PATH. The installer
+      does not need administrator rights and writes only to your home directory.</p>
+    </div>
+    <div class="tabs__panel" id="panel-2">
+      <p>Run the login command once per machine. Credentials are stored in the
+      operating system keychain, never in a dotfile.</p>
+    </div>
+    <div class="tabs__panel" id="panel-3">
+      <p>Point the CLI at a directory and it uploads, builds and promotes in one
+      step. Every deploy is addressable by its commit for the next ninety days.</p>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+</body>
+</html>

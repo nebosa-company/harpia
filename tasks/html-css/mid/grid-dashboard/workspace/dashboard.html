@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Operations</title>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+  <div class="dashboard__brand">Meridian Ops</div>
+
+  <header class="dashboard__topbar">
+    <span class="dashboard__env">production</span>
+    <span class="dashboard__clock">14:02 UTC</span>
+  </header>
+
+  <nav class="dashboard__sidenav" aria-label="Sections">
+    <ul>
+      <li><a href="/ops">Overview</a></li>
+      <li><a href="/ops/services">Services</a></li>
+      <li><a href="/ops/alerts">Alerts</a></li>
+      <li><a href="/ops/deploys">Deploys</a></li>
+      <li><a href="/ops/runbooks">Runbooks</a></li>
+    </ul>
+  </nav>
+
+  <main class="dashboard__main">
+    <h1>Overview</h1>
+    <p>Panels are injected by the application; this page only owns the shell.</p>
+    <div class="panel" id="panel-latency">Latency</div>
+    <div class="panel" id="panel-errors">Errors</div>
+    <div class="panel" id="panel-saturation">Saturation</div>
+  </main>
+
+  <footer class="dashboard__footer">
+    <p>Data refreshed every 30 seconds. Retention 14 days.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
