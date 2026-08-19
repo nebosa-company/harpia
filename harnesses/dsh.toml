@@ -1,0 +1,15 @@
+# DeepSeek's harness (dsh). Runs under WSL only — no Windows wheel for its
+# runtime. The shim converts Windows paths to /mnt/d form and launches the
+# jsonrpc-agent SDK example. dsh prints no usage; tokens are captured on the
+# wire by pointing DEEPSEEK_BASE_URL at Harpia's usage proxy.
+id = "dsh"
+command = [
+    "wsl", "bash",
+    "/mnt/d/repos/harpia/harnesses/dsh-agent.sh",
+    "--workspace", "{workspace}",
+    "--prompt-file", "{prompt_file}",
+    "--session-id", "{session_id}",
+]
+telemetry = "proxy-jsonl"
+base_url_env = "DEEPSEEK_BASE_URL"
+upstream = "https://api.deepseek.com"

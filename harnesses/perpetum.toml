@@ -1,0 +1,16 @@
+# Perpetum, driving deepseek-v4-flash through its ds-fast link.
+# Lifecycle "perpetum": the runner performs `perp init --root {workspace}`,
+# writes .harness/links.md, and mints {req_id} before this command runs.
+id = "perpetum"
+lifecycle = "perpetum"
+command = [
+    "D:/repos/perpetum.io/perp.exe",
+    "run",
+    "--root", "{workspace}",
+    "--requirement", "{req_id}",
+    "--brief", "{prompt}",
+    "--cycle", "1",
+    "--stage", "D",
+]
+telemetry = "perpetum-journal"
+telemetry_path = ".harness/journal.jsonl"

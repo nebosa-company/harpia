@@ -1,0 +1,13 @@
+# Claude Code with its own agent loop, tools, and permission system live —
+# the machinery Perpetum's `claude-cli` link deliberately suppresses.
+# Runs headless in the sandbox; stream-json carries usage and cost.
+id = "claude-code"
+command = [
+    "claude",
+    "-p", "{prompt}",
+    "--model", "{model}",
+    "--output-format", "stream-json",
+    "--verbose",
+    "--permission-mode", "acceptEdits",
+]
+telemetry = "claude-stream-json"
