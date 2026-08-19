@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! Oracle execution: hidden tests, builds, static checks, security probes.
 //! Oracles run after the harness has exited, against the mutated workspace.
 //! Hidden test files are injected here — the harness never saw them.

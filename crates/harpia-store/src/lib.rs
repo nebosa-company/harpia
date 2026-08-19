@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! SQLite persistence for Harpia. One file per bench database; WAL mode;
 //! every write inside a transaction so a killed run never corrupts a round.
 

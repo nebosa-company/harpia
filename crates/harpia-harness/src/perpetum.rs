@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! Perpetum's lifecycle: the three files that must exist in a sandbox before
 //! `perp run --requirement` will work. Mirrors what HarnessBench's adapter
 //! does (`adapters/perpetum.py`): init is `perp init --root`, then links.md,

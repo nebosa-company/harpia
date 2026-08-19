@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 # Launch dsh (DeepSeek's harness) on one Harpia trial, inside WSL.
 #
 # Modeled on harness-bench/scripts/dsh-agent.sh. Everything runs Linux-side:

@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! Report generation: per-round scorecards and paired round-vs-round
 //! comparisons. The scorecard never collapses to one number — the point of
 //! a harness bench is the trade-offs a single score hides.

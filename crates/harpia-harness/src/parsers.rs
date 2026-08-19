@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! Telemetry parsers. Each turns a harness's raw accounting into one
 //! `Telemetry` plus the ordered tool-call list. A parser that finds no
 //! usage at all returns `requests == 0`; the runner records that trial

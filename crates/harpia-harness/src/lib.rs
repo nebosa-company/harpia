@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! Pluggable harness adapters. A harness is declared by a TOML manifest in
 //! `harnesses/<id>.toml`; adding a new harness must not require recompiling
 //! unless it speaks a telemetry dialect no built-in parser covers.

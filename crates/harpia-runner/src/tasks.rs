@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! Task corpus loading: every directory under the tasks root that holds a
 //! `task.toml` is a task. Layout convention: `tasks/<stack>/<tier>/<slug>/`
 //! with `workspace/`, `oracles/`, and `solution/` beside the spec.

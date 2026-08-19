@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 //! A round: (harness, model, effort) over the corpus, with attempts, resume,
 //! and a worker pool. Workers run trials; the round loop owns the store and
 //! writes each result before handing out more work.
